@@ -114,45 +114,45 @@ mrp <- function(formula,
     }
   }
 
-   if (!is.null(pop)) { ## set up and store population NWayData
+  if (!is.null(pop)) { ## set up and store population NWayData
     if(is.data.frame(pop)) {
-      ## construct the population array based on population formula
-      ## next, repeat it across any extra dimensions in poll
-
-      na.omit(pop[, {names(pop) %in% c(population.varnames$inpop, use)}])
-      cat("\nMaking NWay population data:\n")
-      if (sum(population.varnames$inpop %in% names(pop)) != length(population.varnames$inpop) ) {
-        stop(paste("\nVariable ",sQuote(population.varnames$inpop[!(population.varnames$inpop %in% names(pop))])," not found in population."))
-      }
-      if(!(identical(sapply(poll[,population.varnames$inpop], levels),
-                sapply(pop[,population.varnames$inpop], levels)) )) {
-        sapply(population.varnames$inpop, function(x) {
-              if(length(levels(poll[,x])) != length(levels(pop[,x]))){
-                warning("Non-conformable population array. Poststratification will not work unless factor levels are identical. You can still get raw estimates.",call.=FALSE)
+        ## construct the population array based on population formula
+        ## next, repeat it across any extra dimensions in poll
+        cat("\nMaking NWay population data:\n")
+        if (sum(population.varnames$inpop %in% names(pop)) != length(population.varnames$inpop) ) {
+            stop(paste("\nVariable ",
+                       sQuote(population.varnames$inpop[!(population.varnames$inpop %in% names(pop))]),
+                       " not found in population."))
+        }
+        if(!(identical(sapply(poll[,population.varnames$inpop], levels),
+                       sapply(pop[,population.varnames$inpop], levels)) )) {
+            sapply(population.varnames$inpop, function(x) {
+                if(length(levels(poll[,x])) != length(levels(pop[,x]))){
+                    warning("Non-conformable population array. Poststratification will not work unless factor levels are identical.", call.=FALSE)
                 warning(paste("For",sQuote(x),
                         "poll has", length(levels(poll[,x])),
                         "; pop has",length(levels(pop[,x]))),call.=FALSE)
               }
             })}
 
+        main.pop.formula <- as.formula(paste0(c(use, "~", unlist(population.varnames$inpop))))
+        poparray <- prop.table(xtabs(main.pop.formula, data=pop))
 
-      pop.nway <- daply(pop, .variables=unlist(population.varnames$inpop),
-          .fun=makeNWay,pop=TRUE,weights=use,
-          .progress="text"
-      )
-      pop.nway <- array(rep(pop.nway,
-              length.out=length(poll.nway)),
-          dim(getNEffective(poll.nway)), dimnames(getNEffective(poll.nway)))
 
-      pop.nway <- new("NWayData",pop.nway,type="population",
-          levels=saveNWayLevels(pop))
+        pop.nway <- daply(pop, .variables=unlist(population.varnames$inpop),
+                          .fun=makeNWay, pop=TRUE, weights=use,
+                          .progress="text"
+                          )
+        pop.nway <- array(rep(pop.nway,
+                              length.out=length(poll.nway)),
+                          dim(getNEffective(poll.nway)), dimnames(getNEffective(poll.nway)))
+
+        pop.nway <- new("NWayData",pop.nway,type="population",
+                        levels=saveNWayLevels(pop))
     }
   } else { ## No population supplied
     pop.nway <- makeOnesNWay(poll.nway)
   }
-
-  #### ------------------       ##################
-
 
   ## build the default formula unless one has been supplied
   mr.f <- formula(paste("response ~",
