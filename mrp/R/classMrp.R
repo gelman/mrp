@@ -87,19 +87,6 @@ mrp <- function(formula,
                        NWayData(df=poll, variables=mrp.varnames,
                                 response=as.character(mrp.formula[[2]]),
                                 weights=poll.weights, type="poll"))
-
-  ## When multiple polls, renormalize mean1 *in each poll*
-  #poll.nway <- daply(poll, .variables=mrp.varnames, pop=FALSE,
-  #    .fun=makeNWay, .progress="text",
-  #    response=as.character(mrp.formula[[2]]), weights=poll.weights)
-  #poll.nway <- new("NWayData",poll.nway,type="poll",
-  #    levels=saveNWayLevels(poll))
-  #data <- adply(poll.nway, .margins=1:getNumberWays(poll.nway),
-  #    flattenNWay,
-  #    design.effect=getDesignEffect(poll.nway))
-  #data <- restoreNWayLevels(df=data,nway=poll.nway)
-
-  ## Do merges and eval expressions on the data
   data.expressions <- as.expression(add[sapply(add, is.expression)])
   data.merges <- add[sapply(add, is.data.frame)]
   data$finalrow <- 1:nrow(data)
@@ -114,7 +101,8 @@ mrp <- function(formula,
     }
   }
 
-   if (!is.null(pop)) { ## set up and store population NWayData
+
+  if (!is.null(pop)) { ## set up and store population NWayData
     if(is.data.frame(pop)) {
       ## construct the population array based on population formula
       ## next, repeat it across any extra dimensions in poll
@@ -152,7 +140,6 @@ mrp <- function(formula,
   }
 
   #### ------------------       ##################
-
 
   ## build the default formula unless one has been supplied
   mr.f <- formula(paste("response ~",
