@@ -1,0 +1,8 @@
+2009-9-21  Yu-Sung Su     <ys463@columbia.edu>  
+    * DESCRIPTION (Version, Date): 0.00-01
+    * First release!
+2010-10-07 Malecki <malecki@wustl.edu>
+    * Rewrote interface (main 'mrp' function)
+    * Maps now using sp&lattice
+2012-05-26 Wei Wang <ww2243@columbia.edu>
+    * Add xval method for mrp object

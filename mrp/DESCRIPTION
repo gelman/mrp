@@ -1,0 +1,17 @@
+Package: mrp
+Version: 0.81-6
+Date: 2012-02-10
+Title: Multilevel Regression and Poststratification
+Author:
+  Andrew Gelman <gelman@stat.columbia.edu>,
+  Michael Malecki <malecki@wustl.edu>,
+  Daniel Lee <bearlee@alum.mit.edu>,
+  Yu-Sung Su <ys463@columbia.edu>,
+  Wei Wang <ww2243@columbia.edu>
+Maintainer: Michael Malecki <malecki@gmail.com>, Daniel Lee <bearlee@alum.mit.edu>
+Depends: R (>= 2.14), methods, Matrix, blme, arm, sp, lattice, plyr, reshape2, mrpdata, doParallel
+Description: Multilevel Regressions and Poststratification
+License: GPL (>= 2)
+Collate: 'load.first.R' 'classNWayData.R' 'classMrp.R' 'spplot.R' 'xvalMethod.R'
+LazyLoad: yes
+LazyData: yes

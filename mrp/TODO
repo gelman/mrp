@@ -1,0 +1,12 @@
+* TODO [#A] Change examples to use CCES to predict republican vote (or is there a gay marriage question in it?).
+  CCES is redistributable, the prev data are not.
+** TODO [#A] R doc example
+  File: cces-completed1.Rdata (rename to .rda in data dir)
+  marriage.ban.mrp <- mrp(marriage.ban ~ state + age + education + income,
+  dat=CCES.complete)
+** TODO Vignette? 
+* TODO [#B] when no mr.formula is specified, build it with 2-way interactions.
+* TODO [#B] Add either pieces of or link to my [[http://sites.google.com/site/malecki/map-notes][map notes]] to spplot.Rd
+* TODO [#B] Is a jags array just an NWayData array, or does it need its own class? It just has an extra dimension of 'sample' (will be same as stan)
+* TODO [#A] I will fix the code mismatches on poststratify method
+* TODO [#A] Add xval method for mrp
