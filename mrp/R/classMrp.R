@@ -136,6 +136,9 @@ mrp <- function(formula,
             })}
 
 
+      #main.pop.formula <- as.formula(paste0(c(use, "~", unlist(population.varnames$inpop))))
+      #poparray <- prop.table(xtabs(main.pop.formula, data=pop))
+
       pop.nway <- daply(pop, .variables=unlist(population.varnames$inpop),
           .fun=makeNWay,pop=TRUE,weights=use,
           .progress="text"
