@@ -172,7 +172,7 @@ setMethod (f="flattenNWay",
         ybar.w <- v["ybar.w"]
         ## do ybar.w with cases
         response.yes <- ybar.w*N.eff
-        response.no <- N.eff - ybar.w
+        response.no <- N.eff - response.yes
       }
       ans <- c(response.yes,response.no,v)
       names(ans)[1:2] <- c("response.yes","response.no")
