@@ -268,6 +268,11 @@ setMethod(f="getModel",signature(object="mrp"),
     definition=function(object) {
       return(object@multilevelModel)
     })
+setGeneric ("getData", function (object) { standardGeneric ("getData")})
+setMethod(f="getData",signature(object="mrp"),
+    definition=function(object) {
+      return(object@data)
+    })
 
 
 
