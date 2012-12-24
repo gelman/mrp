@@ -35,10 +35,10 @@ mrp <- function(formula,
   mrp.formula <- as.formula(formula)
   mrp.terms <- terms(mrp.formula)
   mrp.varnames <- attr(mrp.terms,"term.labels")
-  population.formula <- update(mrp.formula,population.formula)
+  population.formula <- update(mrp.formula, population.formula)
   population.terms <- terms(population.formula)
   population.varnames <- attr(terms(population.formula),"term.labels")
-  population.varnames <- reorder.popterms(mrp.varnames,population.varnames)
+  population.varnames <- reorder.popterms(mrp.varnames, population.varnames)
 
   # TODO find a more elegant solution for requiring 0/1 values for the response.
   {
@@ -83,49 +83,46 @@ mrp <- function(formula,
                " not found in poll data."))
   }
 
-  data <- NWayData2df (poll.nway <- # need this!
-                       NWayData(df=poll, variables=mrp.varnames,
-                                response=as.character(mrp.formula[[2]]),
-                                weights=poll.weights, type="poll"))
-  data.expressions <- as.expression(add[sapply(add, is.expression)])
-  data.merges <- add[sapply(add, is.data.frame)]
-  data$finalrow <- 1:nrow(data)
-
-  if(length(data.expressions)>0){
-    data <- within(data, sapply(data.expressions, eval.parent, n=2))
-  }
-  ## Attempt merges. ##
-  if(length(data.merges)>0){
-      for(d in 1:length(data.merges)){
-          data <- join(data,data.merges[[d]], type="l", by)
-    }
-  }
+  ## 1. make a base data array with levels contained in the data
+  ## 2. make a population array with the full set of levels
+  ## 3. for levels in population NOT in poll,
+  ##    fill [yes,no,N.eff] with 0.
+  ## 4. flatten and then do joins and expressions.
+  poll.nway <- NWayData(df=poll, variables=mrp.varnames,
+                        response=as.character(mrp.formula[[2]]),
+                        weights=poll.weights)
 
 
   if (!is.null(pop)) { ## set up and store population NWayData
-    if(is.data.frame(pop)) {
-      ## construct the population array based on population formula
-      ## next, repeat it across any extra dimensions in poll
+      if(is.data.frame(pop)) {
+          ## construct the population array based on population formula
+          ## next, repeat it across any extra dimensions in poll
 
-      na.omit(pop[, {names(pop) %in% c(population.varnames$inpop, use)}])
-      cat("\nMaking NWay population data:\n")
-      if (sum(population.varnames$inpop %in% names(pop)) != length(population.varnames$inpop) ) {
-        stop(paste("\nVariable ",sQuote(population.varnames$inpop[!(population.varnames$inpop %in% names(pop))])," not found in population."))
-      }
-      if(!(identical(sapply(poll[,population.varnames$inpop], levels),
-                sapply(pop[,population.varnames$inpop], levels)) )) {
-        sapply(population.varnames$inpop, function(x) {
-              if(length(levels(poll[,x])) != length(levels(pop[,x]))){
-                warning("Non-conformable population array. Poststratification will not work unless factor levels are identical. You can still get raw estimates.",call.=FALSE)
-                warning(paste("For",sQuote(x),
-                        "poll has", length(levels(poll[,x])),
-                        "; pop has",length(levels(pop[,x]))),call.=FALSE)
-              }
-            })}
-      #main.pop.formula <- as.formula(paste0(c(use, "~", unlist(population.varnames$inpop))))
-      #poparray <- prop.table(xtabs(main.pop.formula, data=pop))
-      pop.nway <- daply(pop, .variables=unlist(population.varnames$inpop),
-          .fun=makeNWay,pop=TRUE,weights=use,
+          na.omit(pop[, {names(pop) %in% c(population.varnames$inpop, use)}])
+          cat("\nMaking NWay population data:\n")
+          if (sum(population.varnames$inpop %in% names(pop)) !=
+              length(population.varnames$inpop) ) {
+              stop(paste("\nVariable ",
+                         sQuote(
+                         population.varnames$inpop[!(population.varnames$inpop
+                                                     %in% names(pop))]),
+                         " not found in population."))
+          }
+          if(!(identical(sapply(poll[,population.varnames$inpop], levels),
+                         sapply(pop[,population.varnames$inpop], levels)) )) {
+              sapply(population.varnames$inpop, function(x) {
+                  if(length(levels(poll[,x])) != length(levels(pop[,x]))){
+                      warning("Non-conformable population array. Poststratification will not work unless factor levels are identical. You can still get raw estimates.",call.=FALSE)
+                      warning(paste("For",sQuote(x),
+                                    "poll has", length(levels(poll[,x])),
+                                    "; pop has",length(levels(pop[,x]))),
+                              call.=FALSE)
+                  }
+              })}
+          ##main.pop.formula <- as.formula(paste0(c(use, "~", unlist(population.varnames$inpop))))
+          ##poparray <- prop.table(xtabs(main.pop.formula, data=pop))
+          pop.nway <- daply(pop, .variables=unlist(population.varnames$inpop),
+                            .fun=makeNWay,pop=TRUE,weights=use,
           .progress="text"
       )
       pop.nway <- array(rep(pop.nway,
@@ -139,7 +136,23 @@ mrp <- function(formula,
     pop.nway <- makeOnesNWay(poll.nway)
   }
 
-  #### ------------------       ##################
+
+
+  data <- NWayData2df (poll.nway)
+  data.expressions <- as.expression(add[sapply(add, is.expression)])
+  data.merges <- add[sapply(add, is.data.frame)]
+  data$finalrow <- 1:nrow(data)
+
+  if(length(data.expressions)>0){
+    data <- within(data, sapply(data.expressions, eval.parent, n=2))
+  }
+  ## Attempt merges. ##
+  if(length(data.merges)>0){
+      for(d in 1:length(data.merges)){
+          data <- join(data,data.merges[[d]], type="left")
+    }
+  }
+
 
   ## build the default formula unless one has been supplied
   mr.f <- formula(paste("response ~",
@@ -166,11 +179,11 @@ mrp <- function(formula,
 
 ## For population array, if there are "ways" present in poll but constant
 ## in population, move those terms to the end. Will become constant (1s).
-reorder.popterms <- function(poll,pop){
-  inpop <- poll[poll%in%pop]
-  notinpop <- poll[!{poll%in%pop}]
+reorder.popterms <- function(poll, pop){
+  inpop <- poll[poll %in% pop]
+  notinpop <- poll[!{poll %in% pop}]
 
-  return(list(inpop=inpop,out=notinpop))
+  return(list(inpop=inpop, out=notinpop))
 }
 
 ## Definining Methods
@@ -250,7 +263,6 @@ setGeneric ("getThetaHat", function (object) { standardGeneric ("getThetaHat")})
 setMethod(f="getThetaHat",signature(object="mrp"),
     definition=function(object) {
       theta.hat <- rep (NA, length (getYbarWeighted (object@poll)))
-#           theta.hat[complete.cases(object@data)] <- fitted(object@multilevelModel)
       theta.hat <- fitted(object@multilevelModel)
       theta.hat <- array (theta.hat,
           dim (getYbarWeighted(object@poll)),
@@ -268,16 +280,6 @@ setMethod(f="getModel",signature(object="mrp"),
     definition=function(object) {
       return(object@multilevelModel)
     })
-setGeneric ("getData", function (object) { standardGeneric ("getData")})
-setMethod(f="getData",signature(object="mrp"),
-    definition=function(object) {
-      return(object@data)
-    })
-
-
-
-
-
 
 
 
