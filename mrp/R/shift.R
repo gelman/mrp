@@ -1,6 +1,6 @@
-
-###  goal:  take state opinion levels and figure out what they would look like if projected to a different national mean
+###  goal:  take  a vector of opinion levels -- say, state opinion levels --- and figure out what they would look like if projected to a different national mean
 ##### function that takes an opinion vector across states, a weighting vector of state population percentage of national total, and a projected national mean and gives you a new opinion vector across states with a shift on the logit scale that leads to that national mean
+###   It could be across age levels or another poststatified breakdown.  Or even the full set of cells.  So long as th weight.vec sms to one.
 
 shifted.op.vec <- function(old.op.vec, weight.vec, nat.target){
   new_shifted_national <- function(x){   ((invlogit(logit(old.op.vec)  + x )  %*%  weight.vec   ) - nat.target)^2
