@@ -12,6 +12,5 @@ Maintainer: Michael Malecki <malecki@gmail.com>, Daniel Lee <bearlee@alum.mit.ed
 Depends: R (>= 2.14), methods, Matrix, blme, arm, sp, lattice, plyr, reshape2, mrpdata
 Description: Multilevel Regressions and Poststratification
 License: GPL (>= 2)
-Collate: 'load.first.R' 'classNWayData.R' 'classMrp.R' 'spplot.R' 'xvalMethod.R'
 LazyLoad: yes
 LazyData: yes

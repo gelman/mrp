@@ -90,7 +90,7 @@ mrp <- function(formula,
   ## 4. flatten and then do joins and expressions.
   poll.nway <- NWayData(df=poll, variables=mrp.varnames,
                         response=as.character(mrp.formula[[2]]),
-                        weights=poll.weights)
+                        weights=poll.weights, type="poll")
 
 
   if (!is.null(pop)) { ## set up and store population NWayData
