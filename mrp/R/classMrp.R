@@ -168,11 +168,12 @@ checkResponse <- function(response, varname) {
     response
 }
 makePopulationArray <- function(pop, pop.weights, population.varnames) {
-            main.pop.formula <- as.formula(paste0(c(pop.weights, "~",
-                                                    unlist(population.varnames$inpop))))
-            pop.array <- prop.table(xtabs(main.pop.formula, data=pop))
-            pop.array
-        }
+    main.pop.formula <- as.formula(paste0(c(pop.weights, "~",
+                                            paste(population.varnames$inpop,
+                                                  collapse="+"))))
+    pop.array <- prop.table(xtabs(main.pop.formula, data=pop))
+    pop.array
+}
 
   ## For population array, if there are "ways" present in poll but constant
 ## in population, move those terms to the end. Will become constant (1s).
@@ -185,7 +186,7 @@ reorder.popterms <- function(poll, pop){
 
 getCensusSubscriptForPollData <- function(dim, pop.array, poll.array) {
     match(dimnames(pop.array)[[dim]],
-          dimnames(poll.nway)[[dim]])
+          dimnames(poll.array)[[dim]])
 }
 
 checkPopulationData <- function(population.varnames, pop) {
