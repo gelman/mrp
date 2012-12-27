@@ -23,135 +23,104 @@ setClass(Class="mrp",
 )
 
 mrp <- function(formula,
-    data, poll.weights=1,
-    population=NULL, use=NULL,
-    population.formula=formula,
-    add=NULL, mr.formula=NULL,
-    ...) {
-  poll <- data ## 'data' later becomes the binomial form
-               ## geographic-demographic data.frame, but
-               ## is the natural argument name in the function.
-  pop <- population
-  mrp.formula <- as.formula(formula)
-  mrp.terms <- terms(mrp.formula)
-  mrp.varnames <- attr(mrp.terms,"term.labels")
-  population.formula <- update(mrp.formula, population.formula)
-  population.terms <- terms(population.formula)
-  population.varnames <- attr(terms(population.formula),"term.labels")
-  population.varnames <- reorder.popterms(mrp.varnames, population.varnames)
+                data, poll.weights=1,
+                population=NULL,
+                pop.weights=NULL,
+                population.formula=formula,
+                add=NULL, mr.formula=NULL,
+                ...) {
+    poll <- data ## 'data' later becomes the binomial form
+    ## geographic-demographic data.frame, but
+    ## is the natural argument name in the function.
+    pop <- population
+    mrp.formula <- as.formula(formula)
+    mrp.terms <- terms(mrp.formula)
+    mrp.varnames <- attr(mrp.terms,"term.labels")
+    population.formula <- update(mrp.formula, population.formula)
+    population.terms <- terms(population.formula)
+    population.varnames <- attr(terms(population.formula),"term.labels")
+    population.varnames <- reorder.popterms(mrp.varnames, population.varnames)
 
-  # TODO find a more elegant solution for requiring 0/1 values for the response.
-  {
     response <- poll[, as.character (formula[[2]])]
-    if(is.logical(response)) {
-      response <- as.integer(response)
+    response <- checkResponse(response)
+
+    allvars <- all.vars(mrp.formula)
+    if(poll.weights!=1){ allvars <- c(allvars,poll.weights) }
+
+    ## for complete, imputed datasets don't drop any columns.
+    ## Useful especially when continuous imputed rather than rescaled
+    ## below as an 'add'.
+    if(any(is.na(poll))) {
+        poll <- na.omit(poll[,allvars])
     }
-    if(is.ordered(response) && length(levels(response))==2){
-      warning("Assuming ordered factor 2 levels represent 1=FALSE, 2=TRUE\n")
-      response <- as.integer(response)-1
+
+    ## Set up and store poll NWayData
+    cat("\nMaking NWay poll data:\n")
+    if (sum(mrp.varnames %in% names(poll)) != length(mrp.varnames) ) {
+        stop(paste("\nVariable ",sQuote(mrp.varnames[!(mrp.varnames %in% names(poll))]),
+                   " not found in poll data."))
     }
-    if (!is.numeric (response)) {
-      stop (paste ("'", as.character (formula[[2]]),
-                   "' must be integer values of 0 / 1 or logical", sep=""))
+
+    ## 1. make a base data array with levels contained in the data
+    ## 2. make a population array with the full set of levels
+    ## 3. for levels in population NOT in poll,
+    ##    fill [yes,no,N.eff] with 0.
+    ## 4. flatten and then do joins and expressions.
+    poll.nway <- NWayData(df=poll, variables=mrp.varnames,
+                          response=as.character(mrp.formula[[2]]),
+                          weights=poll.weights, type="poll")
+
+
+
+    if(is.data.frame(pop)) {
+        cat("\nSetting up population array:\n")
+        checkPopulationData(pop, population.varnames)
+        pop.array <- makePopulationArray(pop, pop.weights, population.varnames)
+
+
+        populationSubscripts <- lapply(population.varnames$inpop,
+                                       getCensusSubscriptForPollData,
+                                       pop.array=pop.array,
+                                       poll.array=poll.array)
+        if(population.formula != formula) {
+            addthese <- lapply(population.varnames$notinpop,
+                                           addLevelsForPollControls,
+                                           poll.array=poll.array)
+            populationSubscripts <- c(populationSubscripts, addthese)
+        }
+
+        ## next, repeat it across any extra dimensions in poll
+        pop.array <- array(rep(pop.array,
+                               length.out=length(poll.array)),
+                           dim(getNEffective(poll.array)),
+                           dimnames(getNEffective(poll.array)))
+
+        pop.array <- new("NWayData",pop.array,type="population",
+                         levels=saveNWayLevels(pop))
+    } else { ## No population supplied
+        pop.array <- makeOnesNWay(poll.array)
     }
-    if (length (unique(na.exclude(response))) != 2) {
-      stop (paste ("'", as.character (formula[[2]]),
-                   "' must have two values", sep=""))
+
+
+
+
+    data <- NWayData2df (poll.nway)
+    data.expressions <- as.expression(add[sapply(add, is.expression)])
+    data.merges <- add[sapply(add, is.data.frame)]
+    data$finalrow <- 1:nrow(data)
+
+    if(length(data.expressions)>0){
+        data <- within(data, sapply(data.expressions, eval.parent, n=2))
     }
-    if (all (c(0, 1) != sort(unique(na.exclude(response))))) {
-      stop (paste ("'", as.character (formula[[2]]),
-                   "' has values of ",
-                   sort(unique(na.exclude(response))), sep=""))
+    ## Attempt merges. ##
+    if(length(data.merges)>0){
+        for(d in 1:length(data.merges)){
+            data <- join(data,data.merges[[d]], type="left")
+        }
     }
-  }
-
-
-  allvars <- all.vars(mrp.formula)
-  if(poll.weights!=1){ allvars <- c(allvars,poll.weights) }
-
-  ## for complete, imputed datasets don't drop any columns.
-  ## Useful especially when continuous imputed rather than rescaled
-  ## below as an 'add'.
-  if(any(is.na(poll))) {
-    poll <- na.omit(poll[,allvars])
-  }
-
-  ## Set up and store poll NWayData
-  cat("\nMaking NWay poll data:\n")
-  if (sum(mrp.varnames %in% names(poll)) != length(mrp.varnames) ) {
-    stop(paste("\nVariable ",sQuote(mrp.varnames[!(mrp.varnames %in% names(poll))]),
-               " not found in poll data."))
-  }
-
-  ## 1. make a base data array with levels contained in the data
-  ## 2. make a population array with the full set of levels
-  ## 3. for levels in population NOT in poll,
-  ##    fill [yes,no,N.eff] with 0.
-  ## 4. flatten and then do joins and expressions.
-  poll.nway <- NWayData(df=poll, variables=mrp.varnames,
-                        response=as.character(mrp.formula[[2]]),
-                        weights=poll.weights, type="poll")
-
-
-  if (!is.null(pop)) { ## set up and store population NWayData
-      if(is.data.frame(pop)) {
-          ## construct the population array based on population formula
-          ## next, repeat it across any extra dimensions in poll
-
-          na.omit(pop[, {names(pop) %in% c(population.varnames$inpop, use)}])
-          cat("\nMaking NWay population data:\n")
-          if (sum(population.varnames$inpop %in% names(pop)) !=
-              length(population.varnames$inpop) ) {
-              stop(paste("\nVariable ",
-                         sQuote(
-                         population.varnames$inpop[!(population.varnames$inpop
-                                                     %in% names(pop))]),
-                         " not found in population."))
-          }
-          if(!(identical(sapply(poll[,population.varnames$inpop], levels),
-                         sapply(pop[,population.varnames$inpop], levels)) )) {
-              sapply(population.varnames$inpop, function(x) {
-                  if(length(levels(poll[,x])) != length(levels(pop[,x]))){
-                      warning("Non-conformable population array. Poststratification will not work unless factor levels are identical. You can still get raw estimates.",call.=FALSE)
-                      warning(paste("For",sQuote(x),
-                                    "poll has", length(levels(poll[,x])),
-                                    "; pop has",length(levels(pop[,x]))),
-                              call.=FALSE)
-                  }
-              })}
-          ##main.pop.formula <- as.formula(paste0(c(use, "~", unlist(population.varnames$inpop))))
-          ##poparray <- prop.table(xtabs(main.pop.formula, data=pop))
-          pop.nway <- daply(pop, .variables=unlist(population.varnames$inpop),
-                            .fun=makeNWay,pop=TRUE,weights=use,
-          .progress="text"
-      )
-      pop.nway <- array(rep(pop.nway,
-              length.out=length(poll.nway)),
-          dim(getNEffective(poll.nway)), dimnames(getNEffective(poll.nway)))
-
-      pop.nway <- new("NWayData",pop.nway,type="population",
-          levels=saveNWayLevels(pop))
-    }
-  } else { ## No population supplied
-    pop.nway <- makeOnesNWay(poll.nway)
-  }
 
 
 
-  data <- NWayData2df (poll.nway)
-  data.expressions <- as.expression(add[sapply(add, is.expression)])
-  data.merges <- add[sapply(add, is.data.frame)]
-  data$finalrow <- 1:nrow(data)
-
-  if(length(data.expressions)>0){
-    data <- within(data, sapply(data.expressions, eval.parent, n=2))
-  }
-  ## Attempt merges. ##
-  if(length(data.merges)>0){
-      for(d in 1:length(data.merges)){
-          data <- join(data,data.merges[[d]], type="left")
-    }
-  }
 
 
   ## build the default formula unless one has been supplied
@@ -175,15 +144,61 @@ mrp <- function(formula,
             ## blmer options here, possibly moved to blmer defaults
             ...))
   return(mrp)
+                                }
 }
+checkResponse <- function(response, varname) {
+    if(is.ordered(response) && length(levels(response))==2){
+        warning("Assuming ordered factor 2 levels represent 1=FALSE, 2=TRUE\n")
+        response <- as.integer(response)-1
+    }
+    if (!is.numeric (response)) {
+        stop (paste0(sQuote(varname), " must be integer values of 0 / 1 or logical"))
+    }
+    if (length (unique(na.exclude(response))) != 2) {
+        stop (paste0(sQuote(varname), " must have two values"))
+    }
+    if (all (c(0, 1) != sort(unique(na.exclude(response))))) {
+        stop (paste0(sQuote(varname), " has values of ",
+                     sort(unique(na.exclude(response)))))
+    }
+    if(is.logical(response)) {
+        response <- as.integer(response)
+    }
+    response
+}
+makePopulationArray <- function(pop, pop.weights, population.varnames) {
+            main.pop.formula <- as.formula(paste0(c(pop.weights, "~",
+                                                    unlist(population.varnames$inpop))))
+            pop.array <- prop.table(xtabs(main.pop.formula, data=pop))
+            pop.array
+        }
 
-## For population array, if there are "ways" present in poll but constant
+  ## For population array, if there are "ways" present in poll but constant
 ## in population, move those terms to the end. Will become constant (1s).
 reorder.popterms <- function(poll, pop){
-  inpop <- poll[poll %in% pop]
-  notinpop <- poll[!{poll %in% pop}]
+    inpop <- poll[poll %in% pop]
+    notinpop <- poll[!{poll %in% pop}]
 
-  return(list(inpop=inpop, out=notinpop))
+    return(list(inpop=inpop, out=notinpop))
+}
+
+getCensusSubscriptForPollData <- function(dim, pop.array, poll.array) {
+    match(dimnames(pop.array)[[dim]],
+          dimnames(poll.nway)[[dim]]))
+}
+
+checkPopulationData <- function(population.varnames, pop) {
+    if (sum(population.varnames$inpop %in% names(pop)) !=
+                length(population.varnames$inpop) ) {
+                stop(paste("\nVariable ",
+                           sQuote(
+                           population.varnames$inpop[!(population.varnames$inpop
+                                                       %in% names(pop))]),
+                           " not found in population."))
+            }
+}
+addLevelsForPollControls <- function(var, poll.array){
+    dimnames(poll.array)[[var]]
 }
 
 ## Definining Methods
