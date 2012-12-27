@@ -97,7 +97,7 @@ mrp <- function(formula,
   ## Attempt merges. ##
   if(length(data.merges)>0){
       for(d in 1:length(data.merges)){
-          data <- join(data,data.merges[[d]], type="l", by)
+          data <- join(data,data.merges[[d]], type="l")
     }
   }
 
