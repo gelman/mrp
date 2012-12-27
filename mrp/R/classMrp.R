@@ -66,11 +66,9 @@ mrp <- function(formula,
     ## 3. for levels in population NOT in poll,
     ##    fill [yes,no,N.eff] with 0.
     ## 4. flatten and then do joins and expressions.
-    poll.nway <- NWayData(df=poll, variables=mrp.varnames,
+    poll.array <- NWayData(df=poll, variables=mrp.varnames,
                           response=as.character(mrp.formula[[2]]),
                           weights=poll.weights, type="poll")
-
-
 
     if(is.data.frame(pop)) {
         cat("\nSetting up population array:\n")
@@ -84,11 +82,14 @@ mrp <- function(formula,
                                        poll.array=poll.array)
         if(population.formula != formula) {
             addthese <- lapply(population.varnames$notinpop,
-                                           addLevelsForPollControls,
-                                           poll.array=poll.array)
+                               addLevelsForPollControls,
+                               poll.array=poll.array)
             populationSubscripts <- c(populationSubscripts, addthese)
         }
+        populationSubscripts <- expand.grid(populationSubscripts)
 
+        poll.array <- expandPollArrayToMatchPopulation(poll.array, pop.array,
+                                                       populationSubscripts)
         ## next, repeat it across any extra dimensions in poll
         pop.array <- array(rep(pop.array,
                                length.out=length(poll.array)),
@@ -118,10 +119,6 @@ mrp <- function(formula,
             data <- join(data,data.merges[[d]], type="left")
         }
     }
-
-
-
-
 
   ## build the default formula unless one has been supplied
   mr.f <- formula(paste("response ~",
@@ -200,6 +197,22 @@ checkPopulationData <- function(population.varnames, pop) {
 addLevelsForPollControls <- function(var, poll.array){
     dimnames(poll.array)[[var]]
 }
+
+expandPollArrayToMatchPopulation <- function(poll.array, pop.array, populationSubscripts){
+    out.dims <- c(vapply(populationSubscripts, length, integer(1)), 3)
+out.dimnames <- c(populationSubscripts,
+cellSummary=("N", "design.effect.cell", "ybar.w"))
+out <- array(NA, dim=out.dims, dimnames=out.dims)
+## fill all cells as though empty
+out[rep(TRUE,length(populationSubscripts)),,drop=FALSE] <-
+    c(0, 1, .5)
+## fill with poll data where it exists
+for(i in 1:nrow(populationSubscripts)) {
+out[populationSubscripts[i,,drop=FALSE] <-
+    poll.array[i,,drop=FALSE]
+    out
+}
+
 
 ## Definining Methods
 
