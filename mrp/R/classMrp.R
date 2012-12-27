@@ -219,8 +219,7 @@ expandPollArrayToMatchPopulation <- function(poll.array, pop.array,
     ## but empty cells should be (0,1,.5)
     poll.matrix <- t(apply(poll.matrix,1, fillNAs))
     colnames(poll.matrix) <- c("N", "design.effect.cell", "ybar.w")
-
-
+    browser()
     ## fill with poll data where it exists
     for(i in 1:nrow(populationSubscripts)) {
         args <- list(x=out)
