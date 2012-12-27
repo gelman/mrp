@@ -95,8 +95,8 @@ mrp <- function(formula,
                                                        populationSubscripts)
         ## next, repeat it across any extra dimensions in poll
         pop.array <- array(pop.array,
-                           dim=dim(poll.array[-length(dim(poll.array))]),
-                           dimnames=dimnames(poll.array[-length(dim(poll.array))]))
+                           dim=dim(poll.array)[-length(dim(poll.array))],
+                           dimnames=dimnames(poll.array)[-length(dim(poll.array))])
 
         pop.array <- new("NWayData",pop.array,type="population",
                          levels=saveNWayLevels(pop))
@@ -205,8 +205,6 @@ addLevelsForPollControls <- function(var, poll.array){
 expandPollArrayToMatchPopulation <- function(poll.array, pop.array,
                                              populationSubscripts){
     out.dims <- c(3, dim(pop.array))
-    poll.array <- apply(poll.array, seq_along(dim(pop.array)), function(x) x)
-
     out.dimnames <- c(list(cellSummary=c("N", "design.effect.cell", "ybar.w")),
                          dimnames(pop.array))
     ## fill all cells as though empty
@@ -217,17 +215,31 @@ expandPollArrayToMatchPopulation <- function(poll.array, pop.array,
                                       seq_len(length(dim(pop.array)))))
     poll.matrix <- matrix(poll.array, nrow=dim(populationSubscripts),
                           ncol=3, byrow=TRUE)
+    ## should be able to fix this in makeNWay which otherwise is fine
+    ## but empty cells should be (0,1,.5)
+    poll.matrix <- t(apply(poll.matrix,1, fillNAs))
+    colnames(poll.matrix) <- c("N", "design.effect.cell", "ybar.w")
+
+
     ## fill with poll data where it exists
     for(i in 1:nrow(populationSubscripts)) {
         args <- list(x=out)
+        args$value <- poll.matrix[i,]
         args <- c(args, populationSubscripts[i,])
         args$cellSummary <- 1:3
-        args$value <- poll.matrix[i,,drop=FALSE]
-        do.call("[<-", args)
+        out <- do.call("[<-", args)
     }
+    out <- new("NWayData", out, type="poll",
+               levels=dimnames(out)[-length(dim(out))])
     out
 }
-
+fillNAs <- function(row) {
+   if(all(is.na(row))){
+       c(0,1,.5)
+   } else {
+       row
+   }
+}
 
 ## Definining Methods
 
