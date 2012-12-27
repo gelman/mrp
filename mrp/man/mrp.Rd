@@ -97,8 +97,6 @@ CCES.complete <- within (CCES.complete, {
 ## Poll has four levels of education, so we need to combine
 ## the top two levels in the census data. We'll also go ahead
 ## and trim it down to just the variables used here.
-mrp.census <- na.omit(mrp.census[mrp.census$state \%in\% CCES.complete$state,])
-mrp.census <- na.omit(mrp.census[mrp.census$education \%in\% CCES.complete$education,])
 
 mrp.census <- within(mrp.census,{
     age <- factor(age,exclude=NA,labels=c("18-29","30-44","45-64","65+"))

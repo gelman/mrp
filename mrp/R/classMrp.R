@@ -79,16 +79,17 @@ mrp <- function(formula,
 
 
         populationSubscripts <- lapply(population.varnames$inpop,
-                                       getCensusSubscriptForPollData,
-                                       pop.array=pop.array,
-                                       poll.array=poll.array)
+                                       findBsubscriptsInA,
+                                       A=pop.array, B=poll.array)
+
         if(population.formula != formula) {
             addthese <- lapply(population.varnames$notinpop,
                                addLevelsForPollControls,
                                poll.array=poll.array)
             populationSubscripts <- c(populationSubscripts, addthese)
         }
-        populationSubscripts <- expand.grid(populationSubscripts)
+        populationSubscripts <- as.matrix(expand.grid(populationSubscripts))
+        colnames(populationSubscripts) <- names(dimnames(pop.array))
 
         poll.array <- expandPollArrayToMatchPopulation(poll.array, pop.array,
                                                        populationSubscripts)
@@ -107,7 +108,7 @@ mrp <- function(formula,
 
 
 
-    data <- NWayData2df (poll.nway)
+    data <- NWayData2df (poll.array)
     data.expressions <- as.expression(add[sapply(add, is.expression)])
     data.merges <- add[sapply(add, is.data.frame)]
     data$finalrow <- 1:nrow(data)
@@ -132,7 +133,7 @@ mrp <- function(formula,
         mr.f <- update.formula(mr.f, mr.formula)
     }
     mrp <- new("mrp",
-               poll=poll.nway,
+               poll=poll.array,
                data=data,
                formula=mr.f,
                population=pop.nway
@@ -184,9 +185,8 @@ reorder.popterms <- function(poll, pop){
     return(list(inpop=inpop, out=notinpop))
 }
 
-getCensusSubscriptForPollData <- function(dim, pop.array, poll.array) {
-    match(dimnames(pop.array)[[dim]],
-          dimnames(poll.array)[[dim]])
+findBsubscriptsInA <- function(dim, A, B) {
+    match(dimnames(A)[[dim]], dimnames(B)[[dim]])
 }
 
 checkPopulationData <- function(population.varnames, pop) {
@@ -203,20 +203,30 @@ addLevelsForPollControls <- function(var, poll.array){
     dimnames(poll.array)[[var]]
 }
 
-expandPollArrayToMatchPopulation <- function(poll.array, pop.array, populationSubscripts){
-    out.dims <- c(vapply(populationSubscripts, length, integer(1)), 3)
-    out.dimnames <- c(populationSubscripts,
-                      cellSummary=c("N", "design.effect.cell", "ybar.w"))
-    out <- array(NA, dim=out.dims, dimnames=out.dims)
+expandPollArrayToMatchPopulation <- function(poll.array, pop.array,
+                                             populationSubscripts){
+    out.dims <- c(3, dim(pop.array))
+    poll.array <- apply(poll.array, seq_along(dim(pop.array)), function(x) x)
+
+    out.dimnames <- c(list(cellSummary=c("N", "design.effect.cell", "ybar.w")),
+                         dimnames(pop.array))
     ## fill all cells as though empty
-    out[rep(TRUE,length(populationSubscripts)),,drop=FALSE] <-
-        c(0, 1, .5)
+    out <- array(c(0,1,.5), dim=out.dims, dimnames=out.dimnames)
+    ## put in expected order
+    out <- aperm(out, c(2:length(dim(out)),1))
+    poll.array <- aperm(poll.array, c(length(dim(poll.array)),
+                                      seq_len(length(dim(pop.array)))))
+    poll.matrix <- matrix(poll.array, nrow=dim(populationSubscripts),
+                          ncol=3, byrow=TRUE)
     ## fill with poll data where it exists
     for(i in 1:nrow(populationSubscripts)) {
-        out[populationSubscripts[i,],] <-
-            poll.array[i,,drop=FALSE]
-            out
-        }
+        args <- list(x=out)
+        args <- c(args, populationSubscripts[i,])
+        args$cellSummary <- 1:3
+        args$value <- poll.matrix[i,,drop=FALSE]
+        do.call("[<-", args)
+    }
+    out
 }
 
 
