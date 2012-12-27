@@ -34,6 +34,13 @@ setMethod (f="getNumberWays",
       if(object@type=="ones") { w <- 0 }
       return(w)
     })
+setMethod (f="getNumberWays",
+    signature=signature(object="mrp"),
+    definition=function(object) {
+      poll <- getNumberWays(object@poll)
+      pop <-  getNumberWays(object@population)
+      return (c(poll=poll,pop=pop))
+    })
 
 setGeneric ("getYbarWeighted", function (object) { standardGeneric ("getYbarWeighted")})
 setMethod (f="getYbarWeighted",

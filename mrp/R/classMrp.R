@@ -67,8 +67,8 @@ mrp <- function(formula,
     ##    fill [yes,no,N.eff] with 0.
     ## 4. flatten and then do joins and expressions.
     poll.array <- NWayData(df=poll, variables=mrp.varnames,
-                          response=as.character(mrp.formula[[2]]),
-                          weights=poll.weights, type="poll")
+                           response=as.character(mrp.formula[[2]]),
+                           weights=poll.weights, type="poll")
 
     if(is.data.frame(pop)) {
         cat("\nSetting up population array:\n")
@@ -120,39 +120,41 @@ mrp <- function(formula,
         }
     }
 
-  ## build the default formula unless one has been supplied
-  mr.f <- formula(paste("response ~",
-          paste(paste("(1|",
-                  mrp.varnames,")"),
-              collapse="+"))
-  )
-  if (!missing(mr.formula)){
-    mr.f <- update.formula(mr.f, mr.formula)
-  }
-  mrp <- new("mrp",
-      poll=poll.nway,
-      data=data,
-      formula=mr.f,
-      population=pop.nway
-  )
-  cat("\nRunning Multilevel Regression step.\n")
-  response <- as.matrix(getResponse(mrp))
-  try(mrp <- mr(mrp,
-            ## blmer options here, possibly moved to blmer defaults
-            ...))
-  return(mrp)
-                                }
+    ## build the default formula unless one has been supplied
+    mr.f <- formula(paste("response ~",
+                          paste(paste("(1|",
+                                      mrp.varnames,")"),
+                                collapse="+"))
+                    )
+    if (!missing(mr.formula)){
+        mr.f <- update.formula(mr.f, mr.formula)
+    }
+    mrp <- new("mrp",
+               poll=poll.nway,
+               data=data,
+               formula=mr.f,
+               population=pop.nway
+               )
+    cat("\nRunning Multilevel Regression step.\n")
+    response <- as.matrix(getResponse(mrp))
+    try(mrp <- mr(mrp,
+                  ## blmer options here, possibly moved to blmer defaults
+                  ...))
+    return(mrp)
 }
+
 checkResponse <- function(response, varname) {
     if(is.ordered(response) && length(levels(response))==2){
         warning("Assuming ordered factor 2 levels represent 1=FALSE, 2=TRUE\n")
         response <- as.integer(response)-1
     }
     if (!is.numeric (response)) {
-        stop (paste0(sQuote(varname), " must be integer values of 0 / 1 or logical"))
+        stop (paste0(sQuote(varname),
+                     " must be integer values of 0 / 1 or logical"))
     }
     if (length (unique(na.exclude(response))) != 2) {
-        stop (paste0(sQuote(varname), " must have two values"))
+        stop (paste0(sQuote(varname),
+                     " must have two values"))
     }
     if (all (c(0, 1) != sort(unique(na.exclude(response))))) {
         stop (paste0(sQuote(varname), " has values of ",
@@ -181,7 +183,7 @@ reorder.popterms <- function(poll, pop){
 
 getCensusSubscriptForPollData <- function(dim, pop.array, poll.array) {
     match(dimnames(pop.array)[[dim]],
-          dimnames(poll.nway)[[dim]]))
+          dimnames(poll.nway)[[dim]])
 }
 
 checkPopulationData <- function(population.varnames, pop) {
@@ -200,17 +202,18 @@ addLevelsForPollControls <- function(var, poll.array){
 
 expandPollArrayToMatchPopulation <- function(poll.array, pop.array, populationSubscripts){
     out.dims <- c(vapply(populationSubscripts, length, integer(1)), 3)
-out.dimnames <- c(populationSubscripts,
-cellSummary=("N", "design.effect.cell", "ybar.w"))
-out <- array(NA, dim=out.dims, dimnames=out.dims)
-## fill all cells as though empty
-out[rep(TRUE,length(populationSubscripts)),,drop=FALSE] <-
-    c(0, 1, .5)
-## fill with poll data where it exists
-for(i in 1:nrow(populationSubscripts)) {
-out[populationSubscripts[i,,drop=FALSE] <-
-    poll.array[i,,drop=FALSE]
-    out
+    out.dimnames <- c(populationSubscripts,
+                      cellSummary=c("N", "design.effect.cell", "ybar.w"))
+    out <- array(NA, dim=out.dims, dimnames=out.dims)
+    ## fill all cells as though empty
+    out[rep(TRUE,length(populationSubscripts)),,drop=FALSE] <-
+        c(0, 1, .5)
+    ## fill with poll data where it exists
+    for(i in 1:nrow(populationSubscripts)) {
+        out[populationSubscripts[i,],] <-
+            poll.array[i,,drop=FALSE]
+            out
+        }
 }
 
 
@@ -229,14 +232,6 @@ setMethod( f="getResponse",
     signature=signature(object="mrp"),
     definition=function(object) {
       return(as.matrix(object@data[,c("response.yes","response.no")]))
-    })
-
-setMethod (f="getNumberWays",
-    signature=signature(object="mrp"),
-    definition=function(object) {
-      poll <- getNumberWays(object@poll)
-      pop <-  getNumberWays(object@population)
-      return (c(poll=poll,pop=pop))
     })
 
 setGeneric ("getPopulation", function (object) { standardGeneric ("getPopulation")})
