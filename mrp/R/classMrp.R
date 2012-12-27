@@ -95,8 +95,8 @@ mrp <- function(formula,
                                                        populationSubscripts)
         ## next, repeat it across any extra dimensions in poll
         pop.array <- array(pop.array,
-                           dim=dim(poll.array[-length(poll.array)]),
-                           dimnames=dimnames(poll.array[-length(poll.array)]))
+                           dim=dim(poll.array[-length(dim(poll.array))]),
+                           dimnames=dimnames(poll.array[-length(dim(poll.array))]))
 
         pop.array <- new("NWayData",pop.array,type="population",
                          levels=saveNWayLevels(pop))
