@@ -1,3 +1,5 @@
+##' @exportPattern "."
+
 setClass(Class="mrp",
     representation=representation(
         poll = "NWayData",
