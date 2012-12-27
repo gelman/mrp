@@ -94,10 +94,9 @@ mrp <- function(formula,
         poll.array <- expandPollArrayToMatchPopulation(poll.array, pop.array,
                                                        populationSubscripts)
         ## next, repeat it across any extra dimensions in poll
-        pop.array <- array(rep(pop.array,
-                               length.out=length(poll.array)),
-                           dim(getNEffective(poll.array)),
-                           dimnames(getNEffective(poll.array)))
+        pop.array <- array(pop.array,
+                           dim=dim(poll.array[-length(poll.array)]),
+                           dimnames=dimnames(poll.array[-length(poll.array)]))
 
         pop.array <- new("NWayData",pop.array,type="population",
                          levels=saveNWayLevels(pop))
@@ -169,9 +168,9 @@ checkResponse <- function(response, varname) {
     response
 }
 makePopulationArray <- function(pop, pop.weights, population.varnames) {
-    main.pop.formula <- as.formula(paste0(c(pop.weights, "~",
+    main.pop.formula <- paste0(pop.weights, "~",
                                             paste(population.varnames$inpop,
-                                                  collapse="+"))))
+                                                  collapse="+"))
     pop.array <- prop.table(xtabs(main.pop.formula, data=pop))
     pop.array
 }

@@ -116,7 +116,7 @@ mrp.census <- na.omit(mrp.census)
 mrp.simple <- mrp(ban.gaymarr ~ state+age+education, 
                   data=CCES.complete,
                   population=mrp.census,
-                  use="weighted2004",cov.prior="none")
+                  pop.weights="weighted2004",cov.prior="none")
 print(100*poststratify(mrp.simple, ~ education+age), digits=2)
 \dontrun{
 ## Fit a fuller model, adding state-level predictors:
