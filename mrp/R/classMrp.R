@@ -187,7 +187,7 @@ reorder.popterms <- function(poll, pop){
     inpop <- poll[poll %in% pop]
     notinpop <- poll[!{poll %in% pop}]
 
-    return(list(inpop=inpop, out=notinpop))
+    return(list(inpop=inpop, notinpop=notinpop))
 }
 
 findBsubscriptsInA <- function(dim, A, B) {
