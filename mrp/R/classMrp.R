@@ -91,6 +91,7 @@ mrp <- function(formula,
             pop.dimnames <- c(pop.subscripts, pop.dimnames)
         }
         pop.subscripts <- as.matrix(expand.grid(pop.dimnames))
+        colnames(pop.subscripts) <- names(pop.dimnames)
         pop.array <- array(pop.array,
                            dim=lapply(pop.dimnames, length),
                            dimnames=pop.dimnames)
