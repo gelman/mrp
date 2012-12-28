@@ -86,12 +86,13 @@ mrp <- function(formula,
         pop.dimnames <- dimnames(pop.array)
 
         if(population.formula != formula) {
-            addTheseSubscripts <- lapply(population.varnames["notinpop"],
+            addTheseSubscripts <- lapply(population.varnames$notinpop,
                                          addSubscriptsForPollControls,
                                          poll.array=poll.array)
-            addTheseDimnames <- lapply(population.varnames["notinpop"],
+            addTheseDimnames <- lapply(population.varnames$notinpop,
                                        addDimnamesForPollControls,
                                        poll.array=poll.array)
+            names(addTheseDimnames) <- population.varnames$notinpop
             pop.subscripts <- c(pop.subscripts, addTheseSubscripts)
             pop.dimnames <- c(pop.dimnames, addTheseDimnames)
         }
