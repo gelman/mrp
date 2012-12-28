@@ -208,8 +208,6 @@ NWayData2df <- function (nway) {
       flattenNWay,
       design.effect=getDesignEffect(nway),
                 .progress="text")
-  data <- restoreNWayLevels(df=data,nway=nway)
-
   return (data)
 }
 

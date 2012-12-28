@@ -48,7 +48,9 @@ mrp (formula,
 	  % It is possible, but strongly discouraged, to use a matching
       % factor with a different name (e.g., \sQuote{edu} in \code{poll}
       % with \code{population.formula=.~education})
-	  }
+    }
+    \item{pop.margin}{A margin of the population data to compute other
+    cells relative to. An example is state-level partyID, \code{margin="state"}}
     \item{add}{A \code{list} of additional variables to add to
       the prepared \code{data.frame} used in the multilevel
       regression step. The list may contain items of two types of
@@ -116,7 +118,7 @@ mrp.census <- na.omit(mrp.census)
 mrp.simple <- mrp(ban.gaymarr ~ state+age+education, 
                   data=CCES.complete,
                   population=mrp.census,
-                  pop.weights="weighted2004",cov.prior="none")
+                  pop.weights="weighted2004")
 print(100*poststratify(mrp.simple, ~ education+age), digits=2)
 \dontrun{
 ## Fit a fuller model, adding state-level predictors:

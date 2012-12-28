@@ -28,6 +28,7 @@ mrp <- function(formula,
                 data, poll.weights=1,
                 population=NULL,
                 pop.weights=NULL,
+                pop.margin=NULL,
                 population.formula=formula,
                 add=NULL, mr.formula=NULL,
                 ...) {
@@ -57,7 +58,7 @@ mrp <- function(formula,
     }
 
     ## Set up and store poll NWayData
-    cat("\nMaking NWay poll data:\n")
+    cat("\nExpanding data to array:\n")
     if (sum(mrp.varnames %in% names(poll)) != length(mrp.varnames) ) {
         stop(paste("\nVariable ",sQuote(mrp.varnames[!(mrp.varnames %in% names(poll))]),
                    " not found in poll data."))
@@ -73,9 +74,10 @@ mrp <- function(formula,
                            weights=poll.weights, type="poll")
 
     if(is.data.frame(pop)) {
-        cat("\nSetting up population array:\n")
+        cat("\nMatching poll data to population cells.\n")
         checkPopulationData(pop, population.varnames)
-        pop.array <- makePopulationArray(pop, pop.weights, population.varnames)
+        pop.array <- makePopulationArray(pop, pop.weights, population.varnames,
+                                         pop.margin=pop.margin)
 
 
         populationSubscripts <- lapply(population.varnames$inpop,
@@ -106,7 +108,7 @@ mrp <- function(formula,
 
 
 
-
+    cat("\nCondensing full data array to matrix for modeling:\n")
     data <- NWayData2df (poll.array)
     data.expressions <- as.expression(add[sapply(add, is.expression)])
     data.merges <- add[sapply(add, is.data.frame)]
@@ -135,7 +137,7 @@ mrp <- function(formula,
                poll=poll.array,
                data=data,
                formula=mr.f,
-               population=pop.nway
+               population=pop.array
                )
     cat("\nRunning Multilevel Regression step.\n")
     response <- as.matrix(getResponse(mrp))
@@ -167,11 +169,15 @@ checkResponse <- function(response, varname) {
     }
     response
 }
-makePopulationArray <- function(pop, pop.weights, population.varnames) {
+makePopulationArray <- function(pop, pop.weights, population.varnames,
+                                pop.margin=pop.margin) {
     main.pop.formula <- paste0(pop.weights, "~",
                                             paste(population.varnames$inpop,
                                                   collapse="+"))
-    pop.array <- prop.table(xtabs(main.pop.formula, data=pop))
+    ## xtabs are arrays formed using formula interface
+    ## prop.table with no 'margin'
+    pop.array <- prop.table(xtabs(main.pop.formula, data=pop),
+                            margin=pop.margin)
     pop.array
 }
 
@@ -219,19 +225,16 @@ expandPollArrayToMatchPopulation <- function(poll.array, pop.array,
     ## but empty cells should be (0,1,.5)
     poll.matrix <- t(apply(poll.matrix,1, fillNAs))
     colnames(poll.matrix) <- c("N", "design.effect.cell", "ybar.w")
-    browser()
     ## fill with poll data where it exists
-    for(i in 1:nrow(populationSubscripts)) {
-        args <- list(x=out)
-        args$value <- poll.matrix[i,]
-        args <- c(args, populationSubscripts[i,])
-        args$cellSummary <- 1:3
-        out <- do.call("[<-", args)
+    for(i in 1:3) {
+        indToInsertFromPoll <- cbind(populationSubscripts, i)
+        out[indToInsertFromPoll] <- poll.matrix[,i]
     }
     out <- new("NWayData", out, type="poll",
                levels=dimnames(out)[-length(dim(out))])
     out
 }
+
 fillNAs <- function(row) {
    if(all(is.na(row))){
        c(0,1,.5)
@@ -241,7 +244,6 @@ fillNAs <- function(row) {
 }
 
 ## Definining Methods
-
 ## Getters and Setters
 setGeneric("getData", function(object) {standardGeneric("getData")})
 setMethod (f="getData",
