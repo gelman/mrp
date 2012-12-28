@@ -3,12 +3,10 @@ Version: 0.82
 Date: 2012-12-21
 Title: Multilevel Regression and Poststratification
 Author:
-  Andrew Gelman <gelman@stat.columbia.edu>,
   Michael Malecki <malecki@wustl.edu>,
-  Daniel Lee <bearlee@alum.mit.edu>,
-  Yu-Sung Su <ys463@columbia.edu>,
-  Wei Wang <ww2243@columbia.edu>
-Maintainer: Michael Malecki <malecki@gmail.com>, Daniel Lee <bearlee@alum.mit.edu>
+  Jeffrey R. Lax <JRL2124@columbia.edu>,  
+  Andrew Gelman <gelman@stat.columbia.edu>,
+Maintainer: Michael Malecki <malecki@gmail.com>
 Depends: R (>= 2.14), methods, Matrix, blme, arm, sp, lattice, plyr, reshape2, mrpdata
 Description: Multilevel Regressions and Poststratification
 License: GPL (>= 2)
