@@ -91,7 +91,6 @@ mrp <- function(formula,
             populationSubscripts <- c(populationSubscripts, addthese)
         }
         populationSubscripts <- as.matrix(expand.grid(populationSubscripts))
-        colnames(populationSubscripts) <- names(dimnames(pop.array))
 
         poll.array <- expandPollArrayToMatchPopulation(poll.array, pop.array,
                                                        populationSubscripts)
