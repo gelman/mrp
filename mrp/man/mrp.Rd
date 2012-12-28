@@ -91,8 +91,8 @@ data(mrp.regions)  # regions data.frame with DC separate
 ## both should be factors with identical names and levels.
 CCES.complete <- within (CCES.complete, {
   education <- factor(education,exclude=NA)
-  female <- factor(sex=="Female",exclude=NA)
-  race <- factor(race,exclude=NA)
+  female <- factor(sex=="Female", labels=c("Male","Female"), exclude=NA)
+  race <- factor(race,exclude=NA) 
   f.race <- interaction(female,race)
 })
 
@@ -128,7 +128,7 @@ mrp.statelevel <- mrp(ban.gaymarr~
                       state+f.race+age+education,
                       data=CCES.complete,
                       population=mrp.census,use="weighted2008",
-                      population.formula=.~.-poll,
+                      population.formula= .~.-age,
                       add=list(Statelevel,
                         mrp.regions,
                         expression(age.edu <- interaction(age,education)),
