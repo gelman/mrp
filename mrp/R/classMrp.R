@@ -80,15 +80,20 @@ mrp <- function(formula,
                                          pop.margin=pop.margin)
 
 
-        pop.dimnames <- lapply(population.varnames$inpop,
+        pop.subscripts <- lapply(population.varnames$inpop,
                                        findBsubscriptsInA,
                                        A=pop.array, B=poll.array)
+        pop.dimnames <- dimnames(pop.array)
 
         if(population.formula != formula) {
-            addthese <- lapply(population.varnames$notinpop,
-                               addLevelsForPollControls,
-                               poll.array=poll.array)
-            pop.dimnames <- c(pop.subscripts, pop.dimnames)
+            addTheseSubscripts <- lapply(population.varnames$notinpop,
+                                         addSubscriptsForPollControls,
+                                         poll.array=poll.array)
+            addTheseDimnames <- lapply(population.varnames$notinpop,
+                                       addDimnamesForPollControls,
+                                       poll.array=poll.array)
+            pop.subscripts <- c(pop.subscripts, addTheseSubscripts)
+            pop.dimnames <- c(pop.dimnames, addTheseDimnames)
         }
         pop.subscripts <- as.matrix(expand.grid(pop.dimnames))
         colnames(pop.subscripts) <- names(pop.dimnames)
@@ -201,10 +206,12 @@ checkPopulationData <- function(population.varnames, pop) {
                            " not found in population."))
             }
 }
-addLevelsForPollControls <- function(var, poll.array){
+addSubscriptsForPollControls <- function(var, poll.array){
+    1:length(dimnames(poll.array)[[var]])
+}
+addDimnamesForPollControls <- function(var, poll.array){
     dimnames(poll.array)[[var]]
 }
-
 expandPollArrayToMatchPopulation <- function(poll.array, pop.array,
                                              populationSubscripts){
     out.dims <- c(3, dim(pop.array))
