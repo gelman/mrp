@@ -80,7 +80,7 @@ mrp <- function(formula,
                                          pop.margin=pop.margin)
 
 
-        populationSubscripts <- lapply(population.varnames$inpop,
+        pop.dimnames <- lapply(population.varnames$inpop,
                                        findBsubscriptsInA,
                                        A=pop.array, B=poll.array)
 
@@ -88,19 +88,16 @@ mrp <- function(formula,
             addthese <- lapply(population.varnames$notinpop,
                                addLevelsForPollControls,
                                poll.array=poll.array)
-            populationSubscripts <- c(populationSubscripts, addthese)
+            pop.dimnames <- c(pop.subscripts, pop.dimnames)
         }
-        populationSubscripts <- as.matrix(expand.grid(populationSubscripts))
-
-        poll.array <- expandPollArrayToMatchPopulation(poll.array, pop.array,
-                                                       populationSubscripts)
-        ## next, repeat it across any extra dimensions in poll
+        pop.subscripts <- as.matrix(expand.grid(pop.dimnames))
         pop.array <- array(pop.array,
-                           dim=dim(poll.array)[-length(dim(poll.array))],
-                           dimnames=dimnames(poll.array)[-length(dim(poll.array))])
-
-        pop.array <- new("NWayData",pop.array,type="population",
-                         levels=saveNWayLevels(pop))
+                           dim=lapply(pop.subscripts, length),
+                           dimnames=pop.dimnames)
+        poll.array <- expandPollArrayToMatchPopulation(poll.array, pop.array,
+                                                       pop.subscripts)
+        pop.array <- new("NWayData", pop.array, type="population",
+                         levels=dimnames(pop.array))
     } else { ## No population supplied
         pop.array <- makeOnesNWay(poll.array)
     }
@@ -230,7 +227,7 @@ expandPollArrayToMatchPopulation <- function(poll.array, pop.array,
         out[indToInsertFromPoll] <- poll.matrix[,i]
     }
     out <- new("NWayData", out, type="poll",
-               levels=dimnames(out)[-length(dim(out))])
+               levels=dimnames(pop.array))
     out
 }
 
