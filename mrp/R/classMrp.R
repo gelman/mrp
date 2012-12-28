@@ -92,7 +92,7 @@ mrp <- function(formula,
         }
         pop.subscripts <- as.matrix(expand.grid(pop.dimnames))
         pop.array <- array(pop.array,
-                           dim=lapply(pop.subscripts, length),
+                           dim=lapply(pop.dimnames, length),
                            dimnames=pop.dimnames)
         poll.array <- expandPollArrayToMatchPopulation(poll.array, pop.array,
                                                        pop.subscripts)
