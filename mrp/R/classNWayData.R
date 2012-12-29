@@ -9,7 +9,7 @@ saveNWayLevels <- function(df, variables=TRUE){
   lev <- lapply(df[,fac],attributes)
   return(lev[variables])
 }
-restoreNWayLevels <- function(df=df,nway=nway){
+restoreNWayLevels <- function(df=df, nway=nway){
   pos <- na.omit(names(nway@levels)[match(names(df),names(nway@levels))])
   df[,pos] <- as.data.frame(lapply(pos, function(col) {
                 df[,col] <- factor(df[,col],
@@ -33,6 +33,13 @@ setMethod (f="getNumberWays",
       attr(w,"ways") <- names(dimnames(object))[1:w]
       if(object@type=="ones") { w <- 0 }
       return(w)
+    })
+setMethod (f="getNumberWays",
+    signature=signature(object="mrp"),
+    definition=function(object) {
+      poll <- getNumberWays(object@poll)
+      pop <-  getNumberWays(object@population)
+      return (c(poll=poll,pop=pop))
     })
 
 setGeneric ("getYbarWeighted", function (object) { standardGeneric ("getYbarWeighted")})
@@ -120,13 +127,6 @@ setMethod (f="makeNWay",
     signature=signature(cell="data.frame"),
     definition=function(cell, response="response",
         weights=1, pop=FALSE) {
-      if(pop==TRUE){
-        if(length(weights)!=1) {
-          stop(paste("When supplying a data.frame as ",sQuote("population")," you must also indicate ",sQuote("use"), ", which column of the data.frame to use.\n")) }
-        prop <- sum(cell[,weights])
-        return(prop)
-      }
-
       N <- nrow(cell)
       y <- cell[,response]
       ## quietly allow easy noweight
@@ -136,22 +136,19 @@ setMethod (f="makeNWay",
       }
       w <- cell[,weights]
       ## do weighted mean
-			ybar.w <- weighted.mean(y, w)
+      ybar.w <- weighted.mean(y, w)
 
       if( N > 1 & all(w==1) ) {
-				# This is just for speed. Can use the other loop without
-				# an if statement and it will produce the same result.
-				design.effect.cell <- 1
+          design.effect.cell <- 1
       } else {
-        design.effect.cell <- 1+ var(w/mean(w))
+          design.effect.cell <- 1+ var(w/mean(w))
       }
       ybar.w[is.nan(ybar.w)] <- 0
 
       ans <- c(N=N,
           design.effect.cell=design.effect.cell,
           ybar.w=ybar.w)
-      #print(str(ans))
-      return(ans)
+      ans
     })
 
 ### turns a NWayData array back into a data.frame for lmer call.
@@ -197,21 +194,11 @@ is.NWayData <- function(object) {
 }
 
 NWayData <- function (df, variables, response, weights, type="poll", reference.poll) {
-  if (type=="poll") {
     nway <- daply(df, .variables=variables, pop=FALSE,
         .fun=makeNWay, .progress="text",
         response=response, weights=weights)
-  } else if (type == "population") {
-    nway <- daply(df, .variables=variables, pop=TRUE,
-        .fun=makeNWay, .progress="text",
-        weights=weights)
-    nway <- array(rep(nway,
-            length.out=length(reference.poll)),
-                  ## this dim/dimnames should be "the last dimension"
-            dim(getNEffective(reference.poll)), dimnames(getNEffective(reference.poll)))
-  }
-  nway <- new("NWayData", nway, type=type,
-      levels=saveNWayLevels(df, variables))
+    nway <- new("NWayData", nway, type=type,
+                levels=saveNWayLevels(df, variables))
 
   return (nway)
 }
@@ -221,8 +208,6 @@ NWayData2df <- function (nway) {
       flattenNWay,
       design.effect=getDesignEffect(nway),
                 .progress="text")
-  data <- restoreNWayLevels(df=data,nway=nway)
-
   return (data)
 }
 

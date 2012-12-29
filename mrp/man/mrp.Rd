@@ -48,7 +48,9 @@ mrp (formula,
 	  % It is possible, but strongly discouraged, to use a matching
       % factor with a different name (e.g., \sQuote{edu} in \code{poll}
       % with \code{population.formula=.~education})
-	  }
+    }
+    \item{pop.margin}{A margin of the population data to compute other
+    cells relative to. An example is state-level partyID, \code{margin="state"}}
     \item{add}{A \code{list} of additional variables to add to
       the prepared \code{data.frame} used in the multilevel
       regression step. The list may contain items of two types of
@@ -89,16 +91,14 @@ data(mrp.regions)  # regions data.frame with DC separate
 ## both should be factors with identical names and levels.
 CCES.complete <- within (CCES.complete, {
   education <- factor(education,exclude=NA)
-  female <- factor(sex=="Female",exclude=NA)
-  race <- factor(race,exclude=NA)
+  female <- factor(sex=="Female", labels=c("Male","Female"), exclude=NA)
+  race <- factor(race,exclude=NA) 
   f.race <- interaction(female,race)
 })
 
 ## Poll has four levels of education, so we need to combine
 ## the top two levels in the census data. We'll also go ahead
 ## and trim it down to just the variables used here.
-mrp.census <- na.omit(mrp.census[mrp.census$state \%in\% CCES.complete$state,])
-mrp.census <- na.omit(mrp.census[mrp.census$education \%in\% CCES.complete$education,])
 
 mrp.census <- within(mrp.census,{
     age <- factor(age,exclude=NA,labels=c("18-29","30-44","45-64","65+"))
@@ -118,7 +118,7 @@ mrp.census <- na.omit(mrp.census)
 mrp.simple <- mrp(ban.gaymarr ~ state+age+education, 
                   data=CCES.complete,
                   population=mrp.census,
-                  use="weighted2004",cov.prior="none")
+                  pop.weights="weighted2004")
 print(100*poststratify(mrp.simple, ~ education+age), digits=2)
 \dontrun{
 ## Fit a fuller model, adding state-level predictors:
@@ -128,7 +128,7 @@ mrp.statelevel <- mrp(ban.gaymarr~
                       state+f.race+age+education,
                       data=CCES.complete,
                       population=mrp.census,use="weighted2008",
-                      population.formula=.~.-poll,
+                      population.formula= .~.-age,
                       add=list(Statelevel,
                         mrp.regions,
                         expression(age.edu <- interaction(age,education)),
