@@ -352,10 +352,8 @@ setMethod(f="getModel",signature(object="mrp"),
 ## return a full-dimension shifted array
 
 
-setGeneric ("poststratify", function (object, formula=NULL, ...) { standardGeneric ("poststratify")})
-setMethod (f="poststratify",
-    signature=signature(object="mrp"),
-    definition=function (object, formula=NULL) {
+
+.poststratify <- function (object, formula=NULL) {
       spec <- formula
       if(is.null(object@population)) {
         warning("Object does not contain population data;\nestimates returned instead.")
@@ -385,8 +383,11 @@ setMethod (f="poststratify",
         ans[is.nan(ans)] <- NA
         return(ans)
       }
-    })
-
+    }
+setGeneric ("poststratify", function (object, formula=NULL, ...) { standardGeneric ("poststratify")})
+setMethod (f="poststratify",
+    signature=signature(object="mrp"),
+    definition=.poststratify)
 
 setMethod (f="poststratify",
     signature=signature(object="NWayData"),
