@@ -222,6 +222,8 @@ expandPollArrayToMatchPopulation <- function(poll.array, pop.array,
     out.dims <- c(3, dim(pop.array))
     out.dimnames <- c(list(cellSummary=c("N", "design.effect.cell", "ybar.w")),
                          dimnames(pop.array))
+    warnAboutMissingCells(dimnames(poll.array), dimnames(pop.array))
+
     ## fill all cells as though empty
     out <- array(c(0,1,.5), dim=out.dims, dimnames=out.dimnames)
     ## put in expected order
@@ -242,6 +244,30 @@ expandPollArrayToMatchPopulation <- function(poll.array, pop.array,
     out <- new("NWayData", out, type="poll",
                levels=dimnames(pop.array))
     out
+}
+warnAboutMissingCells <- function(poll.dims, pop.dims) {
+    for(d in names(pop.dims)) {
+        if(length(poll.dims[[d]]) < length(pop.dims[[d]])) {
+           warning("No data in ", sQuote(d),
+                   ":", serialPaste(setdiff(pop.dims[[d]],
+                                            poll.dims[[d]])))
+       }
+    }
+}
+
+##' serial paste
+##'
+##' Function to paste together a list of items, separated by commas
+##' (if more than 2), and with the last one having the collapse string.
+##'
+##' @param x vector or list
+##' @param collapse default="and"
+##' @export
+serialPaste <- function (x, collapse="and") {
+	##
+	if (length(x)>1) x[length(x)] <- paste(collapse, x[length(x)])
+	return(ifelse(length(x)>2, paste(x, collapse=", "),
+                      paste(x, collapse=" ")))
 }
 
 fillNAs <- function(row) {
