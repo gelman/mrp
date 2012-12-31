@@ -34,3 +34,4 @@ Collate:
     'shift.R'
     'spplot.R'
     'xval.R'
+    'showMrp.R'
