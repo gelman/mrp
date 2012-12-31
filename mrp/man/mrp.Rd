@@ -115,7 +115,7 @@ mrp.census <- within(mrp.census,{
 mrp.census <- na.omit(mrp.census)
 
 ## Ready to run simple mrp with poll and population:
-mrp.simple <- mrp(ban.gaymarr ~ state+age+education, 
+mrp.simple <- mrp(ban.gaymarr ~ state+age+education+race, 
                   data=CCES.complete,
                   population=mrp.census,
                   pop.weights="weighted2004")
@@ -127,8 +127,8 @@ print(100*poststratify(mrp.simple, ~ education+age), digits=2)
 mrp.statelevel <- mrp(ban.gaymarr~
                       state+f.race+age+education,
                       data=CCES.complete,
-                      population=mrp.census,use="weighted2008",
-                      population.formula= .~.-age,
+                      population=mrp.census, pop.weights="weighted2008",
+                      #population.formula= .~.-age,
                       add=list(Statelevel,
                         mrp.regions,
                         expression(age.edu <- interaction(age,education)),
