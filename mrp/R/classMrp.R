@@ -312,16 +312,15 @@ setMethod (f="getFormula",
       return (object@formula)
     })
 
+.getThetaHat <- function(object) {
+    pop <- getPopulation(object)
+    theta.hat <- array (fitted(getModel(object)),
+                        dim=dim(pop), dimnames=dimnames(pop))
+    return(theta.hat)
+}
 setGeneric ("getThetaHat", function (object) { standardGeneric ("getThetaHat")})
 setMethod(f="getThetaHat",signature(object="mrp"),
-    definition=function(object) {
-      theta.hat <- rep (NA, length (getYbarWeighted (object@poll)))
-      theta.hat <- fitted(object@multilevelModel)
-      theta.hat <- array (theta.hat,
-          dim (getYbarWeighted(object@poll)),
-          dimnames=dimnames (getYbarWeighted(object@poll)))
-      return(theta.hat)
-    })
+    definition=.getThetaHat)
 
 setGeneric ("getEstimates", function (object) { standardGeneric ("getEstimates")})
 setMethod(f="getEstimates",signature(object="mrp"),
