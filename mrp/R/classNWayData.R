@@ -12,10 +12,10 @@ saveNWayLevels <- function(df, variables=TRUE){
 restoreNWayLevels <- function(df=df, nway=nway){
   pos <- na.omit(names(nway@levels)[match(names(df),names(nway@levels))])
   df[,pos] <- as.data.frame(lapply(pos, function(col) {
-                df[,col] <- factor(df[,col],
-                levels=nway@levels[[col]]$levels,
-                ordered=nway@levels[[col]]$class[1]=="ordered")
-            }))
+      df[,col] <- factor(df[,col],
+                         levels=nway@levels[[col]],
+                         ordered=TRUE)
+  }))
   return(df)
 }
 

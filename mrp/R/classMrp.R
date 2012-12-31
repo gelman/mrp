@@ -249,7 +249,7 @@ warnAboutMissingCells <- function(poll.dims, pop.dims) {
     for(d in names(pop.dims)) {
         if(length(poll.dims[[d]]) < length(pop.dims[[d]])) {
            warning("No data in ", sQuote(d),
-                   ":", serialPaste(setdiff(pop.dims[[d]],
+                   " : ", serialPaste(setdiff(pop.dims[[d]],
                                             poll.dims[[d]])))
        }
     }
