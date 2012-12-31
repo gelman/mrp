@@ -56,6 +56,7 @@ mrp <- function(formula,
     if(any(is.na(poll))) {
         poll <- na.omit(poll[,allvars])
     }
+    poll <- checkPoll(poll)
 
     ## Set up and store poll NWayData
     cat("\nExpanding data to array:\n")
@@ -171,6 +172,9 @@ checkResponse <- function(response, varname) {
         response <- as.integer(response)
     }
     response
+}
+checkPoll <- function(poll){
+    return(poll)
 }
 makePopulationArray <- function(pop, pop.weights, population.varnames,
                                 pop.margin=pop.margin) {
