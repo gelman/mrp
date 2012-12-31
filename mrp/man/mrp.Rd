@@ -121,7 +121,7 @@ mrp.simple <- mrp(ban.gaymarr ~ state+age+education+race,
                   pop.weights="weighted2004")
 print(100*poststratify(mrp.simple, ~ education+age), digits=2)
 \dontrun{
-## Fit a fuller model, adding state-level predictors:
+## Fit a fuller model, adding state-level predictors and an age-level linear predictor:
 ## This model is also used in the not-run example
 ## for plotting maps.
 mrp.statelevel <- mrp(ban.gaymarr~
