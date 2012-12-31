@@ -194,7 +194,7 @@ reorder.popterms <- function(poll, pop){
 }
 
 findBsubscriptsInA <- function(dim, A, B) {
-    match(dimnames(A)[[dim]], dimnames(B)[[dim]])
+    match(dimnames(B)[[dim]], dimnames(A)[[dim]])
 }
 
 checkPopulationData <- function(population.varnames, pop) {
