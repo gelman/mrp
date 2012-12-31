@@ -25,7 +25,7 @@ License: GPL (>= 2)
 LazyLoad: yes
 LazyData: yes
 Collate:
-    'allClasses.R'
+    'AllClasses.R'
     'load.first.R'
     'mr.R'
     'mrp.R'
