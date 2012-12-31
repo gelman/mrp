@@ -19,7 +19,8 @@ mrp (formula,
     \item{formula}{A formula representation of the binary outcome variable
       and the desired eventual
       poststratification; i.e., the \dQuote{ways} by which to
-      break down the poll and population data, given as factor
+      break down the poll and population data, which should always be
+      given as factor
       variables with matching names and levels in both \code{poll}
       and \code{population}. By default, this formula will also be
       used to construct the multilevel model, with an intercept
