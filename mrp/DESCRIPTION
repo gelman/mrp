@@ -17,6 +17,7 @@ Depends:
     arm,
     sp,
     lattice,
+    grid,
     plyr,
     reshape2,
     mrpdata
