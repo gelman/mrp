@@ -7,14 +7,16 @@ setClass("NWayData",representation(type="character",levels="list"),contains="arr
 setClass("jagsNWayData",representation(type="character",levels="list"),contains="array")
 
 setClass(Class="mrp",
-    representation=representation(
-        poll = "NWayData",
-        data = "data.frame",
-        formula = "formula",
-        multilevelModel = "mer",
-        population = "NWayData"),
-    validity=function (object) {
-      if (is.null (object@data)) {
+         representation=representation(
+         poll = "NWayData",
+         data = "data.frame",
+         formula = "formula",
+         multilevelModel = "mer",
+         population = "NWayData",
+         outcome="character"),
+
+         validity=function (object) {
+             if (is.null (object@data)) {
         stop ("[mrp: validation] flattened data is missing")
       }
       if (is.null (object@poll)) {

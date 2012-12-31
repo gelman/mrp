@@ -117,8 +117,10 @@ mrp <- function(formula,
                poll=poll.array,
                data=data,
                formula=mr.f,
-               population=pop.array
+               population=pop.array,
+               outcome=as.character(formula[[2]])
                )
+
     cat("\nRunning Multilevel Regression step.\n")
     response <- as.matrix(getResponse(mrp))
     try(mrp <- mr(mrp,
@@ -343,6 +345,17 @@ setMethod(f="getData",signature(object="mrp"),
     definition=function(object) {
       return(object@data)
     })
+setGeneric ("getOutcome", function (object) { standardGeneric ("getOutcome")})
+setMethod(f="getOutcome",signature(object="mrp"),
+    definition=function(object) {
+      return(object@outcome)
+    })
+setGeneric ("getAdded", function (object) { standardGeneric ("getAdded")})
+setMethod(f="getAdded",signature(object="mrp"),
+    definition=function(object) {
+      return(object@added)
+    })
+
 
 
 
