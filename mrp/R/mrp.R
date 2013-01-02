@@ -156,6 +156,9 @@ checkPoll <- function(poll){
 }
 makePopulationArray <- function(pop, pop.weights, population.varnames,
                                 pop.margin=pop.margin) {
+
+    if (missing(pop.weights)) {
+        warn("Warning: pop.weights unspecified.  Assuming all cells of equal weight.") }
     main.pop.formula <- paste0(pop.weights, "~",
                                             paste(population.varnames$inpop,
                                                   collapse="+"))
