@@ -2,11 +2,10 @@ Package: mrp
 Version: 0.90
 Date: 2012-12-28
 Title: Multilevel Regression and Poststratification
-Author:
-  Andrew Gelman <gelman@stat.columbia.edu>,
-  Michael Malecki <malecki@wustl.edu>,
-  Jeffrey R. Lax <JRL2124@columbia.edu>
-  Wei Wang <ww2243@columbia.edu>
+Author: Andrew Gelman <gelman@stat.columbia.edu>,
+    Michael Malecki <malecki@wustl.edu>,
+    Jeffrey R. Lax <JRL2124@columbia.edu>
+    Wei Wang <ww2243@columbia.edu>
 Maintainer: Michael Malecki <malecki@gmail.com>, Daniel Lee
     <bearlee@alum.mit.edu>
 Depends:
@@ -26,11 +25,13 @@ License: GPL (>= 2)
 LazyLoad: yes
 LazyData: yes
 Collate:
-    'classMrp.R'
-    'classNWayData.R'
+    'AllClasses.R'
     'load.first.R'
     'mr.R'
+    'mrp.R'
+    'nwayData.R'
     'poststratify.R'
     'shift.R'
     'spplot.R'
-    'xvalMethod.R'
+    'xval.R'
+    'showMrp.R'

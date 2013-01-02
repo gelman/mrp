@@ -1,1 +1,4 @@
+export(serialPaste)
 exportPattern(".")
+import(grid)
+import(lattice)
