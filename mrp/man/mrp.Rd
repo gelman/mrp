@@ -8,15 +8,17 @@
 }
 
 \usage{
-mrp (formula,
+mrp (cell.formula,
      data, poll.weights=1,
-     population=NULL, use=NULL,
+     population=NULL,
+     pop.weights=NULL,
+     pop.margin=NULL
      population.formula=formula,
      add=NULL, mr.formula=NULL,
      \dots)
 }
 \arguments{
-    \item{formula}{A formula representation of the binary outcome variable
+    \item{cell.formula}{A formula representation of the binary outcome variable
       and the desired eventual
       poststratification; i.e., the \dQuote{ways} by which to
       break down the poll and population data, which should always be
@@ -38,8 +40,10 @@ mrp (formula,
     \item{population}{A \code{data.frame} containing population (e.g. census)
       data with variable names and factor levels matching those in
       \code{poll} and specified in \code{formula}.}
-    \item{use}{The column of the \code{population} data to use for
+    \item{pop.weights}{The column of the \code{population} data to use for
       poststratification.}
+    \item{pop.margin}{Margin of population data on which to sum other
+cells. Used in modeling PartyID, but implementation is not stable.}
     \item{population.formula}{Any modifications to be made to the
       formula above. In the example below, we poststratify by poll,
       which has to be removed from the ways that we stratify the

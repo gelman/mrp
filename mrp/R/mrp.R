@@ -1,6 +1,6 @@
 
 
-mrp <- function(formula,
+mrp <- function(cell.formula,
                 data, poll.weights=1,
                 population=NULL,
                 pop.weights=NULL,
