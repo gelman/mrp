@@ -14,7 +14,8 @@ mrp (cell.formula,
      pop.weights=NULL,
      pop.margin=NULL
      population.formula=formula,
-     add=NULL, mr.formula=NULL,
+     grouplevel=NULL,
+     mr.formula=NULL,
      \dots)
 }
 \arguments{
@@ -56,16 +57,17 @@ cells. Used in modeling PartyID, but implementation is not stable.}
     }
     \item{pop.margin}{A margin of the population data to compute other
     cells relative to. An example is state-level partyID, \code{margin="state"}}
-    \item{add}{A \code{list} of additional variables to add to
+    \item{grouplevel}{A \code{list} of additional variables to add to
       the prepared \code{data.frame} used in the multilevel
       regression step. The list may contain items of two types of
       objects: a \bold{data.frame} to be left-joined onto the data via
       \code{merge}; or an \bold{expression} to be evaluated \sQuote{within} 
-	  the prepared data, such as a transformation of another variable. 
+      the prepared (and joined to any data.frames),
+       such as a transformation of another variable. 
 	  An example of the latter would be a data.frame with
       a column containing the \sQuote{region} for every \sQuote{state}
       in the data.}
-    \item{mr.formula}{A formula specification for the multilevel model
+    \item{formula}{A formula specification for the multilevel model
       to run in the prepared data. The left-hand side should always be
     \sQuote{response}. For convenience, the formula is handled by
       \code{update.formula} so that \code{.} indicates the 
