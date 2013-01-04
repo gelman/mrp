@@ -48,6 +48,7 @@
       regression. The left-hand side is always \sQuote{response}.}
     \item{\code{multilevelModel}:}{ The multilevel regression model 
       (class \code{mer} created by \code{\link[lme4]{glmer}})}
+    \item{\code{outcome}:}{character. The name of the outcome variable.}
     \item{\code{poll}:}{ An N-way array (\code{\link{NWayData-class}})
       constructed from a survey.}
     \item{\code{population}:}{ The population distribution, also of

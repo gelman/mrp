@@ -64,7 +64,7 @@ mrp (formula.cell,
     \code{expression(z.age <- rescale(age))}
     
   }
-  \item{formula.update}{A formula specification for the multilevel model
+  \item{formula.model.update}{A formula specification for the multilevel model
     to run in the prepared data. The left-hand side should always be
     \sQuote{response}. For convenience, the formula is handled by
     \code{update.formula} so that \code{.} indicates the 
@@ -73,7 +73,7 @@ mrp (formula.cell,
     just an intercept term for each of the variables in the main
     formula specification (\code{(1|way1)+(1|way2)} etc.)
   }
-  \item{population.formula}{Any modifications to be made to the
+  \item{formula.pop.update}{Any modifications to be made to the
     \code{formula.cell} above. In the example below, we control for poll,
     but the population is the same for all values of \emph{poll}.
     If used, should be of the \code{\link[stats]{update.formula}}
@@ -105,12 +105,7 @@ mrp (formula.cell,
   
   \item{pop.margin}{Margin of population data on which to sum other
     cells. Used in modeling PartyID, but implementation is not stable.}
-  
-  \item{pop.margin}{A margin of the population data to compute other
-    cells relative to. An example is state-level partyID,
-    \code{margin="state"} -- implementation not stable.
-  }
-  
+    
   \item{\dots}{Additional arguments to be passed to the multilevel
     regression \code{\link[blme]{bglmer}} step.}
 }
