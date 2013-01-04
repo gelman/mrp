@@ -1,18 +1,18 @@
 
 
-mrp <- function(formula,
+mrp <- function(cell.formula,
                 data, poll.weights=1,
                 population=NULL,
                 pop.weights=NULL,
                 pop.margin=NULL,
                 population.formula=formula,
-                add=NULL, mr.formula=NULL,
+                grouplevel=NULL, formula=NULL,
                 ...) {
     poll <- data ## 'data' later becomes the binomial form
     ## geographic-demographic data.frame, but
     ## is the natural argument name in the function.
     pop <- population
-    mrp.formula <- as.formula(formula)
+    mrp.formula <- as.formula(cell.formula)
     mrp.terms <- terms(mrp.formula)
     mrp.varnames <- attr(mrp.terms,"term.labels")
     population.formula <- update(mrp.formula, population.formula)
@@ -90,18 +90,18 @@ mrp <- function(formula,
 
     cat("\nCondensing full data array to matrix for modeling:\n")
     data <- NWayData2df (poll.array)
-    data.expressions <- as.expression(add[sapply(add, is.expression)])
-    data.merges <- add[sapply(add, is.data.frame)]
+    data.expressions <- as.expression(grouplevel[sapply(grouplevel, is.expression)])
+    data.merges <- grouplevel[sapply(grouplevel, is.data.frame)]
     data$finalrow <- 1:nrow(data)
 
-    if(length(data.expressions)>0){
-        data <- within(data, sapply(data.expressions, eval.parent, n=2))
-    }
     ## Attempt merges. ##
     if(length(data.merges)>0){
         for(d in 1:length(data.merges)){
             data <- join(data,data.merges[[d]], type="left")
         }
+    }
+    if(length(data.expressions)>0){
+        data <- within(data, sapply(data.expressions, eval.parent, n=2))
     }
 
     ## build the default formula unless one has been supplied
@@ -110,8 +110,8 @@ mrp <- function(formula,
                                       mrp.varnames,")"),
                                 collapse="+"))
                     )
-    if (!missing(mr.formula)){
-        mr.f <- update.formula(mr.f, mr.formula)
+    if (!missing(formula)){
+        mr.f <- update.formula(mr.f, formula)
     }
     mrp <- new("mrp",
                poll=poll.array,
