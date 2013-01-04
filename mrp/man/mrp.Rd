@@ -166,9 +166,10 @@ mrp.statelevel <- mrp(ban.gaymarr~
                       state+f.race+age+education,
                       data=CCES.complete,
                       population=mrp.census, pop.weights="weighted2008",
-                      #population.formula= .~.-age,
-                      grouplevel=list(Statelevel,
-                        mrp.regions,
+                      population.formula.update= .~.-age,
+                      grouplevel.data.frames=list(Statelevel,
+                        mrp.regions),
+                      grouplevel.expressions=list(
                         expression(age.edu <- interaction(age,education)),
                         ## an ordered factor, we use a normalized
                         ## continuous z.age as the prior mean for
@@ -181,7 +182,7 @@ mrp.statelevel <- mrp(ban.gaymarr~
 ##  an expanded version.
 getFormula(mrp.statelevel)
 
-## Update the mr.formula on already-prepared mrp object and re-fit:
+## Update the model.formula on already-prepared mrp object and re-fit:
 mrp.statelevel <- mr(mrp.statelevel, .~.+(1|region)+ (1|age.edu)+
                      z.age+p.relig.full+p.kerry.full)
 
