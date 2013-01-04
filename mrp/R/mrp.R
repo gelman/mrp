@@ -244,6 +244,7 @@ warnAboutMissingCells <- function(poll.dims, pop.dims) {
 ##' @param x vector or list
 ##' @param collapse default="and"
 ##' @export
+##' @examples
 serialPaste <- function (x, collapse="and") {
 	##
 	if (length(x)>1) x[length(x)] <- paste(collapse, x[length(x)])
