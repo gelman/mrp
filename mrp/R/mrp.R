@@ -1,21 +1,25 @@
 
 
-mrp <- function(cell.formula,
-                data, poll.weights=1,
+
+mrp <- function(formula.cell,
+                data,
                 population=NULL,
                 pop.weights=NULL,
+                grouplevel.data.frames=NULL,
+                grouplevel.expressions=NULL,
+                formula.model.update=NULL,
+                poll.weights=1,
+                formula.pop.update=formula.cell,
                 pop.margin=NULL,
-                population.formula=formula,
-                grouplevel=NULL, formula=NULL,
                 ...) {
     poll <- data ## 'data' later becomes the binomial form
     ## geographic-demographic data.frame, but
     ## is the natural argument name in the function.
     pop <- population
-    mrp.formula <- as.formula(cell.formula)
-    mrp.terms <- terms(mrp.formula)
+    formula.cell <- as.formula(formula.cell)
+    mrp.terms <- terms(formula.cell)
     mrp.varnames <- attr(mrp.terms,"term.labels")
-    population.formula <- update(mrp.formula, population.formula)
+    population.formula <- update(formula.cell, formula.pop.update)
     population.terms <- terms(population.formula)
     population.varnames <- attr(terms(population.formula),"term.labels")
     population.varnames <- reorder.popterms(mrp.varnames, population.varnames)
@@ -23,7 +27,7 @@ mrp <- function(cell.formula,
     response <- poll[, as.character (formula[[2]])]
     response <- checkResponse(response)
 
-    allvars <- all.vars(mrp.formula)
+    allvars <- all.vars(formula.cell)
     if(poll.weights!=1){ allvars <- c(allvars,poll.weights) }
 
     ## for complete, imputed datasets don't drop any columns.
@@ -47,7 +51,7 @@ mrp <- function(cell.formula,
     ##    fill [yes,no,N.eff] with 0.
     ## 4. flatten and then do joins and expressions.
     poll.array <- NWayData(df=poll, variables=mrp.varnames,
-                           response=as.character(mrp.formula[[2]]),
+                           response=as.character(formula.cell[[2]]),
                            weights=poll.weights, type="poll")
 
     if(is.data.frame(pop)) {
@@ -90,18 +94,16 @@ mrp <- function(cell.formula,
 
     cat("\nCondensing full data array to matrix for modeling:\n")
     data <- NWayData2df (poll.array)
-    data.expressions <- as.expression(grouplevel[sapply(grouplevel, is.expression)])
-    data.merges <- grouplevel[sapply(grouplevel, is.data.frame)]
     data$finalrow <- 1:nrow(data)
 
     ## Attempt merges. ##
-    if(length(data.merges)>0){
-        for(d in 1:length(data.merges)){
-            data <- join(data,data.merges[[d]], type="left")
+    if(length(grouplevel.data.frames)>0){
+        for(d in 1:length(grouplevel.data.frames)){
+            data <- join(data,grouplevel.data.frames[[d]], type="left")
         }
     }
-    if(length(data.expressions)>0){
-        data <- within(data, sapply(data.expressions, eval.parent, n=2))
+    if(length(grouplevel.expressions)>0){
+        data <- within(data, sapply(grouplevel.expressions, eval.parent, n=2))
     }
 
     ## build the default formula unless one has been supplied
