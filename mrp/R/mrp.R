@@ -24,7 +24,7 @@ mrp <- function(formula.cell,
     population.varnames <- attr(terms(population.formula),"term.labels")
     population.varnames <- reorder.popterms(mrp.varnames, population.varnames)
 
-    response <- poll[, as.character (formula[[2]])]
+    response <- poll[, as.character (formula.cell[[2]])]
     response <- checkResponse(response)
 
     allvars <- all.vars(formula.cell)
@@ -66,7 +66,7 @@ mrp <- function(formula.cell,
                                        A=pop.array, B=poll.array)
         pop.dimnames <- dimnames(pop.array)
 
-        if(population.formula != formula) {
+        if(population.formula != formula.cell) {
             addTheseSubscripts <- lapply(population.varnames$notinpop,
                                          addSubscriptsForPollControls,
                                          poll.array=poll.array)
@@ -112,15 +112,15 @@ mrp <- function(formula.cell,
                                       mrp.varnames,")"),
                                 collapse="+"))
                     )
-    if (!missing(formula)){
-        mr.f <- update.formula(mr.f, formula)
+    if (!missing(formula.model.update)){
+        mr.f <- update.formula(mr.f, formula.model.update)
     }
     mrp <- new("mrp",
                poll=poll.array,
                data=data,
                formula=mr.f,
                population=pop.array,
-               outcome=as.character(formula[[2]])
+               outcome=as.character(formula.cell[[2]])
                )
 
     cat("\nRunning Multilevel Regression step.\n")
@@ -356,30 +356,6 @@ setMethod(f="getOutcome",signature(object="mrp"),
     definition=function(object) {
       return(object@outcome)
     })
-setGeneric ("getAdded", function (object) { standardGeneric ("getAdded")})
-setMethod(f="getAdded",signature(object="mrp"),
-    definition=function(object) {
-      return(object@added)
-    })
-
-
-
-
-
-##### NEW SHIFT FUNCTION for state vote total.
-##### only one margin now.
-
-## shift(mrp,
-## turnoutData (vector or char name of data col),
-## ~shiftvar)
-
-## p1 = collapse across population by shiftvar
-## delta = apply (p1, shiftfun, turnoutdata)
-##  do this optimization and get a bunch of
-##  shiftresults
-## p2 = sweep delta+population array
-## return a full-dimension shifted array
-
 
 
 .poststratify <- function (object, formula=NULL) {
