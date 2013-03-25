@@ -23,9 +23,9 @@ mrp <- function(formula.cell,
     population.terms <- terms(population.formula)
     population.varnames <- attr(terms(population.formula),"term.labels")
     population.varnames <- reorder.popterms(mrp.varnames, population.varnames)
-
-    response <- poll[, as.character (formula.cell[[2]])]
-    response <- checkResponse(response)
+    response.varname <- as.character (formula.cell[[2]])
+    response <- poll[, response.varname]
+    response <- checkResponse(response, response.varname)
 
     allvars <- all.vars(formula.cell)
     if(poll.weights!=1){ allvars <- c(allvars,poll.weights) }
