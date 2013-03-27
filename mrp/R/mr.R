@@ -1,4 +1,4 @@
-setGeneric ("mr", function (object,mr.formula,...) { standardGeneric ("mr")})
+setGeneric ("mr", function (object,mr.formula.update,...) { standardGeneric ("mr")})
 #setGeneric ("multilevelRegression", function (object) { standardGeneric ("multilevelRegression")})
 setMethod (f="mr",
     signature=signature(object="mrp"),
