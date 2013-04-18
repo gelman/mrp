@@ -1,9 +1,9 @@
 ##' Multilevel regression and poststratification
-##' 
+##'
 ##' Set up survey and population data, and a multilevel regression model used
 ##' for poststratifying by an arbitrary number of strata or \dQuote{ways}.
-##' 
-##' 
+##'
+##'
 ##' @param formula.cell A formula representation of the binary outcome variable
 ##' and the desired eventual poststratification; i.e., the \dQuote{ways} by
 ##' which to break down the poll and population data, which should always be
@@ -34,7 +34,7 @@
 ##' the example below we construct two types: interaction terms and a linear
 ##' prior mean for a factor: \code{expression(interaction1and2 <-
 ##' interaction(term1,term2))} \code{expression(z.age <- rescale(age))}
-##' 
+##'
 
 ##' @param formula.model.update A formula specification for the multilevel
 ##' model to run in the prepared data. The left-hand side should always be
@@ -49,14 +49,14 @@
 ##' the population is the same for all values of \emph{poll}.  If used, should
 ##' be of the \code{\link[stats]{update.formula}} template form,
 ##' \code{.~.-var}.
-##' 
+##'
 ##' This replicates the population data for all levels of the variable
 ##' \sQuote{excluded} in this fashion.  \emph{Note:} This argument \bold{will
 ##' change}, to \code{constant.population.dimensions="chr"}.
 ##' @param poll.weights Name of variable of the survey weights for respondents
 ##' in the poll. This is used to compute the effective \eqn{N}, weighted
 ##' \eqn{\bar{Y}}, and Design Effect. Default is to make all weights equal.
-##' 
+##'
 ##' Ideally, the dimensions specified by \code{formula.cell} would account for
 ##' all of the variation of survey weights in respondents in all cells.
 ##' Sometimes, survey researchers design samples that leave some variation in
@@ -64,7 +64,7 @@
 ##' inflates or deflates the effective \eqn{N} of respondents in
 ##' poststratification cells based on the average variance of design weights in
 ##' all cells and each cell's deviation from that overall design effect.
-##' 
+##'
 ##' If multiple polls are included and contain poll.weights, they must be
 ##' normalized within each poll before \emph{mrp} attempts to normalize the
 ##' weights across all polls for all cells.
@@ -76,32 +76,32 @@
 ##' by \code{mrp()}; \code{\link{plotmrp}} for how to plot poststratified
 ##' results onto maps.
 ##' @examples
-##' 
+##'
 ##' \donttest{
 ##' library(mrpdata)
 ##' library(mrp)
-##' 
+##'
 ##' ## Load example data.
 ##' data(CCES.complete)
-##' 
+##'
 ##' ## Helper datasets for other US applications of MRP:
 ##' data(spmap.states) # projected US state map
 ##' data(mrp.census)   # census with common demo strata
 ##' data(mrp.regions)  # regions data.frame with DC separate
-##' 
+##'
 ##' ## To ensure matching of strata between poll and population,
 ##' ## both should be factors with identical names and levels.
 ##' CCES.complete <- within (CCES.complete, {
 ##'   education <- factor(education,exclude=NA)
 ##'   female <- factor(sex=="Female", labels=c("Male","Female"), exclude=NA)
-##'   race <- factor(race,exclude=NA) 
+##'   race <- factor(race,exclude=NA)
 ##'   f.race <- interaction(female,race)
 ##' })
-##' 
+##'
 ##' ## Poll has four levels of education, so we need to combine
 ##' ## the top two levels in the census data. We'll also go ahead
 ##' ## and trim it down to just the variables used here.
-##' 
+##'
 ##' mrp.census <- within(mrp.census,{
 ##'     age <- factor(age,exclude=NA,labels=c("18-29","30-44","45-64","65+"))
 ##'     education[education=="postgraduate"] <- "college graduate"
@@ -115,9 +115,9 @@
 ##'     f.race <- interaction(sex,race)
 ##' })
 ##' mrp.census <- na.omit(mrp.census)
-##' 
+##'
 ##' ## Ready to run simple mrp with poll and population:
-##' mrp.simple <- mrp(ban.gaymarr ~ state+age+education+race, 
+##' mrp.simple <- mrp(ban.gaymarr ~ state+age+education+race,
 ##'                   data=CCES.complete,
 ##'                   population=mrp.census,
 ##'                   pop.weights="weighted2004")
@@ -145,15 +145,15 @@
 ##' ## Note: the formula is expanded from the condensed version in "formula" to
 ##' ##  an expanded version.
 ##' getFormula(mrp.statelevel)
-##' 
+##'
 ##' ## Update the model.formula on already-prepared mrp object and re-fit:
 ##' mrp.statelevel <- mr(mrp.statelevel, .~.+(1|region)+ (1|age.edu)+
 ##'                      z.age+p.relig.full+p.kerry.full)
-##' 
+##'
 ##' ## Fine plot control is shown with this example in plotmrp documentation!
 ##' }
 ##' }
-##' 
+##' @export
 mrp <- function(formula.cell,
                 data,
                 population=NULL,
@@ -394,11 +394,11 @@ warnAboutMissingCells <- function(poll.dims, pop.dims) {
 
 
 ##' serial paste
-##' 
+##'
 ##' Function to paste together a list of items, separated by commas (if more
 ##' than 2), and with the last one having the collapse string.
-##' 
-##' 
+##'
+##'
 ##' @param x vector or list
 ##' @param collapse default="and"
 serialPaste <- function (x, collapse="and") {
@@ -418,13 +418,28 @@ fillNAs <- function(row) {
 
 ## Definining Methods
 ## Getters and Setters
+
+##' mrp object methods
+##'
+##' Mostly getters and setters for its slots
+##'
+##' @export
+##' @docType methods
+##' @aliases getData-method
+##' @rdname mrp-methods
 setGeneric("getData", function(object) {standardGeneric("getData")})
+##' @aliases getData,mrp-method
+##' @rdname mrp-methods
+##' @export
 setMethod (f="getData",
     signature=signature(object="mrp"),
     definition=function(object) {
       return (object@data)
     })
 
+##' @aliases getResponse-method getResponse,mrp-method
+##' @rdname mrp-methods
+##' @export
 setGeneric("getResponse", function(object) {standardGeneric("getResponse")})
 setMethod( f="getResponse",
     signature=signature(object="mrp"),
@@ -432,6 +447,9 @@ setMethod( f="getResponse",
       return(as.matrix(object@data[,c("response.yes","response.no")]))
     })
 
+##' @aliases getPopulation-method getPopulation,mrp-method
+##' @rdname mrp-methods
+##' @export
 setGeneric ("getPopulation", function (object) { standardGeneric ("getPopulation")})
 setMethod (f="getPopulation",
 		signature=signature(object="mrp"),
@@ -440,7 +458,9 @@ setMethod (f="getPopulation",
 
 			return (object@population)
 		})
-
+##' @aliases setPopulation-method setPopulation,mrp-method
+##' @rdname mrp-methods
+##' @export
 setGeneric ("setPopulation", function (object, population) { standardGeneric ("setPopulation")})
 setMethod (f="setPopulation",
     signature=signature(object="mrp"),
@@ -453,6 +473,8 @@ setMethod (f="setPopulation",
       return (object)
     })
 
+##' @aliases setPopulationOnes-method setPopulationOnes,mrp-method
+##' @rdname mrp-methods
 setGeneric ("setPopulationOnes", function (object) { standardGeneric ("setPopulationOnes")})
 setMethod (f="setPopulationOnes",
     signature=signature(object="mrp"),
@@ -464,7 +486,9 @@ setMethod (f="setPopulationOnes",
       return(object)
 
     } )
-
+##' @aliases setFormula-method setFormula,mrp-method
+##' @rdname mrp-methods
+##' @export
 setGeneric ("setFormula", function (object, formula) { standardGeneric ("setFormula")})
 setMethod (f="setFormula",
     signature=signature(object="mrp"),
@@ -473,6 +497,9 @@ setMethod (f="setFormula",
       return (object)
     })
 
+##' @aliases getFormula-method getFormula,mrp-method
+##' @rdname mrp-methods
+##' @export
 setGeneric ("getFormula", function (object) { standardGeneric ("getFormula")})
 setMethod (f="getFormula",
     signature=signature(object="mrp"),
@@ -486,173 +513,48 @@ setMethod (f="getFormula",
                         dim=dim(pop), dimnames=dimnames(pop))
     return(theta.hat)
 }
+
+##' @aliases getThetaHat-method getThetaHat,mrp-method
+##' @rdname mrp-methods
+##' @export
 setGeneric ("getThetaHat", function (object) { standardGeneric ("getThetaHat")})
 setMethod(f="getThetaHat",signature(object="mrp"),
     definition=.getThetaHat)
 
+##' @aliases getEstimates-method getEstimates,mrp-method
+##' @rdname mrp-methods
+##' @export
 setGeneric ("getEstimates", function (object) { standardGeneric ("getEstimates")})
 setMethod(f="getEstimates",signature(object="mrp"),
     definition=function(object) {
       return(getThetaHat(object))
     })
+##' @aliases getModel-method getModel,mrp-method
+##' @rdname mrp-methods
+##' @export
 setGeneric ("getModel", function (object) { standardGeneric ("getModel")})
 setMethod(f="getModel",signature(object="mrp"),
     definition=function(object) {
       return(object@multilevelModel)
     })
+##' @aliases getData-method getData,mrp-method
+##' @rdname mrp-methods
+##' @export
 setGeneric ("getData", function (object) { standardGeneric ("getData")})
 setMethod(f="getData",signature(object="mrp"),
     definition=function(object) {
       return(object@data)
     })
+
+##' @aliases getOutcome-method getOutcome,mrp-method
+##' @rdname mrp-methods
+##' @export
 setGeneric ("getOutcome", function (object) { standardGeneric ("getOutcome")})
 setMethod(f="getOutcome",signature(object="mrp"),
     definition=function(object) {
       return(object@outcome)
     })
 
-
-.poststratify <- function (object, formula=NULL) {
-      spec <- formula
-      if(is.null(object@population)) {
-        warning("Object does not contain population data;\nestimates returned instead.")
-        return(getThetaHat(object));
-      }
-      if(is.null(spec)){
-        spec <- rep(FALSE,getNumberWays(object@poll))
-      }
-      if(is.formula(spec)){
-        spec <- attr(terms(spec),"term.labels")
-      }
-      stopifnot (object@population != numeric(0))
-
-      poststratified <- getThetaHat(object) * object@population
-
-      if(!is.logical(spec)){
-        groups <- match(spec,
-            attr(getNumberWays(object@poll),"ways"))
-      } else {
-        groups <- which (spec == TRUE)
-      }
-      if (length(groups) == 0) {
-        return (sum (poststratified, na.rm=TRUE) / sum (object@population))
-      } else {
-        ans <- (apply (poststratified, groups, sum, na.rm=TRUE) /
-              apply(object@population, groups, sum))
-        ans[is.nan(ans)] <- NA
-        return(ans)
-      }
-    }
-setGeneric ("poststratify", function (object, formula=NULL, ...) { standardGeneric ("poststratify")})
-setMethod (f="poststratify",
-    signature=signature(object="mrp"),
-    definition=.poststratify)
-
-setMethod (f="poststratify",
-    signature=signature(object="NWayData"),
-    definition=function (object, formula=NULL, fun=mean,
-      population=Census.NWay#, sort=NULL
-      ) {
-      if(object@type=="jagsNWayData"){
-        spec <- formula
-
-        if(is.null(spec)){
-          spec <- rep(FALSE,length(dimnames(object)))
-        }
-        if(is.formula(spec)){
-          spec <- attr(terms(spec),"term.labels")
-        }
-        stopifnot (population != numeric(0))
-
-        poststratified <- object * population
-
-        if(!is.logical(spec)){
-          groups <- match(spec,
-                          names(dimnames(object)) )
-        } else {
-          groups <- which (spec == TRUE)
-        }
-        if (length(groups) == 0) {
-          ans <- sum (poststratified, na.rm=TRUE) / sum (population)
-        } else {
-          ans <- (apply (poststratified, groups, sum, na.rm=TRUE) /
-                  apply(population, groups, sum, na.rm=TRUE))
-          ans[is.nan(ans)] <- NA
-          ans <- new("NWayData",
-                     ans, type="poststratified",
-                     levels=object@levels[groups])
-        }
-        ## if (!is.null(sort)) {
-        ##   sortme <- rep(TRUE,length(dimnames(ans)))
-        ##   sortme[which(dimnames(ans) == sort)] <- FALSE
-        ##   ans <- apply(ans,sortme,sort)
-        ## }
-        return(ans)
-      } else {
-        spec <- formula
-        if(is.null(spec)){
-          spec <- rep(FALSE, length(dim(object)) )
-        }
-        if(is.formula(spec)){
-          spec <- attr(terms(spec),"term.labels")
-        }
-        if(!is.logical(spec)){
-          groups <- match(spec,
-                          names(dimnames(object)) )
-        } else {
-          groups <- which (spec == TRUE)
-        }
-        if (length(groups) == 0) {
-          ans <- do.call(fun, args=list(object, na.rm=TRUE))
-        } else {
-          ans <- (apply (object, groups, fun, na.rm=TRUE))
-          ans[is.nan(ans)] <- NA
-          ans <- new("NWayData",
-                     ans, type="poststratified",
-                     levels=object@levels[groups])
-
-        }
-        ## if (!is.null(sort)) {
-        ##   browser()
-        ##   sortme <- rep(TRUE,length(dimnames(ans)))
-        ##   sortme[which(dimnames(ans) == sort)] <- FALSE
-        ##   #ans <- apply(ans,sortme,sort)
-        ## }
-        return(ans)
-      }
-
-         })
-
-setMethod (f="poststratify",
-    signature=signature(object="jagsNWayData"),
-    definition=function (object, formula=NULL, fun=mean, population=Census.NWay) {
-      spec <- formula
-
-      if(is.null(spec)){
-        spec <- rep(FALSE,length(dimnames(object)))
-      }
-      if(is.formula(spec)){
-        spec <- attr(terms(spec),"term.labels")
-      }
-      stopifnot (population != numeric(0))
-
-      poststratified <- object * population
-
-      if(!is.logical(spec)){
-        groups <- match(spec,
-                        names(dimnames(object)) )
-      } else {
-        groups <- which (spec == TRUE)
-      }
-      if (length(groups) == 0) {
-        return (sum (poststratified, na.rm=TRUE) / sum (population))
-      } else {
-        ans <- (apply (poststratified, groups, sum, na.rm=TRUE) /
-              apply(population, groups, sum, na.rm=TRUE))
-        ans[is.nan(ans)] <- NA
-        return(ans)
-      }
-    })
 
 
 ##### INTERCEPT SHIFT BY STATE FOR KNOWN TURNOUT

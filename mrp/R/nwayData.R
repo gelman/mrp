@@ -19,6 +19,31 @@ restoreNWayLevels <- function(df=df, nway=nway){
 
 ## Returns the number of ways of the analysis and an attribute "ways"
 ## a character vector of names of 'ways' variables.
+
+##' Get Number of Ways for MRP analysis
+##'
+##' A cross-classified dataset for multilevel regression and poststratification
+##' is an \eqn{N}-dimensional array. Each dimension in the array is one of the
+##' \dQuote{ways} by which it can later be poststratified. For various reasons
+##' it may be useful to query a \code{\link{mrp-class}} object or an
+##' \code{\link{NWayData-class}} object for these dimensions and their names.
+##'
+##' @rdname NWayData-methods
+##' @name getNumberWays
+##' @aliases getNumberWays-method getNumberWays,mrp-method
+##' getNumberWays,NWayData-method getNumberWays
+##' @docType methods
+##' @section Methods: \describe{ \item{list("signature(object = \"mrp\")")}{
+##' Returns a vector of length 2 with names \sQuote{poll} and \sQuote{pop}. In
+##' the special case where no population data has been assigned (and an array
+##' of 1s is used to return aggregated fitted values from the multilevel model)
+##' the value returned for \sQuote{pop} is 0.  }
+##'
+##' \item{list("signature(object = \"NWayData\")")}{ Returns the number of ways
+##' and an attribute \sQuote{ways} containing the character vector of names of
+##' the \dQuote{ways} by which it is constructed.  } }
+##' @keywords methods
+##' @export
 setGeneric ("getNumberWays", function (object) { standardGeneric ("getNumberWays") })
 setMethod (f="getNumberWays",
     signature=signature(object="NWayData"),
@@ -107,6 +132,9 @@ setMethod (f="getDesignEffect",
       return (weighted.mean (getDesignEffectByCell (object), getN(object), na.rm=TRUE))
     })
 
+##' @rdname mrp-methods
+##' @aliases getData,NWayData-method
+##' @export
 setGeneric ("getData", function (object) { standardGeneric ("getData")})
 setMethod (f="getData",
     signature=signature(object="NWayData"),
@@ -187,6 +215,7 @@ setMethod (f="makeOnesNWay",
     } )
 
 ## Convenience
+##' @export
 is.NWayData <- function(object) {
   inherits(object,"NWayData")
 }
@@ -233,6 +262,9 @@ NWayData2df <- function (nway) {
 }
 
 ## just print the array when asked interactively
+##' @export
+##' @rdname mrp-methods
+##' @aliases show,NWayData-method
 setMethod(show, "NWayData",
           definition=function(object) show(object@.Data))
 #setOldClass("array")
