@@ -33,7 +33,7 @@
 ##' of the variables in the main formula specification
 ##' (\code{(1|way1)+(1|way2)} etc.)
 ##' @param \dots Additional arguments to be passed to the multilevel regression
-##' step, which uses \code{\link[lme4]{glmer}} by default.
+##' step, which uses \code{\link[blme]{bglmer}}.
 ##' @seealso \code{\link{mrp-class}} for an example.  \code{\link{mrp-class}}
 ##' for other methods on the objects produced by \code{mrp()};
 ##' \code{\link{plotmrp}} for how to plot poststratified results onto maps.

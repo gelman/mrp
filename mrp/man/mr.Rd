@@ -19,7 +19,7 @@
 
   \item{\dots}{Additional arguments to be passed to the
   multilevel regression step, which uses
-  \code{\link[lme4]{glmer}} by default.}
+  \code{\link[blme]{bglmer}}.}
 }
 \description{
   Run a (binomial) multilevel regression in survey data for

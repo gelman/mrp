@@ -19,7 +19,9 @@ Depends:
     plyr,
     reshape2,
     mrpdata
-Suggests: doMC, colorspace
+Suggests:
+    doMC,
+    colorspace
 Description: Multilevel Regressions and Poststratification
 License: GPL (>= 2)
 LazyLoad: yes
