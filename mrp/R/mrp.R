@@ -286,6 +286,7 @@ mrp <- function(formula.cell,
 
 checkResponse <- function(response, varname) {
     if(is.ordered(response) && length(levels(response))==2){
+        ## include the factor levels in this warning.
         warning("Assuming ordered factor 2 levels represent 1=FALSE, 2=TRUE\n")
         response <- as.integer(response)-1
     }
