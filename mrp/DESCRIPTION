@@ -1,6 +1,6 @@
 Package: mrp
-Version: 0.99
-Date: 2012-04-18
+Version: 1.0
+Date: 2012-05-02
 Title: Multilevel Regression and Poststratification
 Author: Andrew Gelman <gelman@stat.columbia.edu>,
     Michael Malecki <malecki@wustl.edu>,
