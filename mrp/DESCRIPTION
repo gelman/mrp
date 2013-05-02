@@ -1,6 +1,6 @@
 Package: mrp
 Version: 0.99
-Date: 2012-01-28
+Date: 2012-04-18
 Title: Multilevel Regression and Poststratification
 Author: Andrew Gelman <gelman@stat.columbia.edu>,
     Michael Malecki <malecki@wustl.edu>,
@@ -8,7 +8,7 @@ Author: Andrew Gelman <gelman@stat.columbia.edu>,
     Wei Wang <ww2243@columbia.edu>
 Maintainer: Michael Malecki <malecki@gmail.com>
 Depends:
-    R (>= 2.14),
+    R (>= 2.15),
     methods,
     Matrix,
     blme,
@@ -19,6 +19,9 @@ Depends:
     plyr,
     reshape2,
     mrpdata
+Suggests:
+    doMC,
+    colorspace
 Description: Multilevel Regressions and Poststratification
 License: GPL (>= 2)
 LazyLoad: yes

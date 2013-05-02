@@ -8,4 +8,8 @@
     message("Multilevel regression formula: ", getOutcome(object), " ~")
     print(getFormula(object)[[3]], showEnv=FALSE)
 }
+
+##' @rdname mrp-methods
+##' @aliases show,mrp-method
+##' @export
 setMethod("show", signature("mrp"), .showmrp)
