@@ -163,6 +163,11 @@ print(100*poststratify(mrp.simple, ~ education+age), digits=2)
 ## Fit a fuller model, adding state-level predictors:
 ## This model is also used in the not-run example
 ## for plotting maps.
+## Note: for the population.formula here, we remove 'age' to demonstrate
+## the use of the arg. The more common scenario is to remove 'poll'
+## when combining several polls -- each gets a varying intercept,
+## but they're not included in poststratification.
+
 mrp.statelevel <- mrp(ban.gaymarr~
                       state+f.race+age+education,
                       data=CCES.complete,
