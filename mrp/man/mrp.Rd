@@ -172,7 +172,7 @@ mrp.statelevel <- mrp(ban.gaymarr~
                       state+f.race+age+education,
                       data=CCES.complete,
                       population=mrp.census, pop.weights="weighted2008",
-                      population.formula.update= .~.-age,
+                      formula.pop.update= .~.-age,
                       grouplevel.data.frames=list(Statelevel,
                         mrp.regions),
                       grouplevel.expressions=list(
