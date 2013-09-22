@@ -1,6 +1,6 @@
 .xval <- function(object, formula, folds, loss.type, ...){
     ## create a list of length folds that holds different partitions
-    require("doMC")
+    require("parallel")
     K <- folds
     M <- object
     if(missing(formula)) {
@@ -26,7 +26,6 @@
 
     if(missing(loss.type)) loss.type <- "log"
     ##            require(doMC, quietly=T)
-    registerDoMC()
     response <- M@data[,c("response.yes", "response.no")];
     response <- ceiling(response) # annoying floating point rounding errors
     partition <- array(0, dim=c(2, 2, nrow(response), K))
@@ -50,7 +49,7 @@
 
     if(loss.type=="log") {
         k <- 1 ## bound below but this silences 'note' from CHECK
-        loss <- foreach(k = 1:K, .verbose=FALSE) %dopar% {
+        loss <- parallel::mclapply(1:K, function(k){
             response <- as.matrix((listofpartition[[k]]$training)[, c("response.yes", "response.no")])
             attr(fm, ".Environment") <- environment() ## crucial!! Environment of formula!!
             foo <- blmer(fm, data=listofpartition[[k]]$training, family=quasibinomial, ...)
@@ -64,8 +63,8 @@
             n <- rowSums(S)
             loss <- data.frame(pred, logloss, n)
             return(loss)
-        }
-        cl.loss <-  foreach(k = 1:K, .verbose=FALSE) %dopar% {
+        })
+        cl.loss <- parallel::mclapply(1:K, function(k) {
             response <- as.matrix((listofpartition[[k]]$training)[, c("response.yes", "response.no")])
             attr(cl.fm, ".Environment") <- environment()
             foo <- glm(cl.fm, data=listofpartition[[k]]$training, family=quasibinomial)
@@ -79,7 +78,7 @@
             n <- rowSums(S)
             loss <- data.frame(pred, logloss, n)
             return(loss)
-        }
+        })
         ## lb.loss <-  foreach(k = 1:K, .verbose=FALSE) %dopar% {
 
         ##   S <- listofpartition[[k]]$testing
