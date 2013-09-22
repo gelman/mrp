@@ -28,7 +28,8 @@ poststratified survey results.}
 \references{
   \url{http://nationalatlas.gov/atlasftp.html}; for projection see
   \url{http://egsc.usgs.gov/isb/pubs/MapProjections/projections.html}
-  and to apply other projections, see \link[rgdal]{spTransform}.
+  and to apply other projections, see spTransform in the rgdal package.
+  Its installation can be tedious cross-platform, or I would like to it.
   and the Spatial CRAN task view (\url{http://cran.r-project.org/web/views/Spatial.html}) }
 \examples{
 data(spmap.states)
