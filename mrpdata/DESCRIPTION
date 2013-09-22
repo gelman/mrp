@@ -1,23 +1,18 @@
 Package: mrpdata
-Version: 0.1
-Date: 2012-02-09
-Title: Data for Multilevel Regression and Poststratification
+Version: 1.0
+Date: 2013-09-21
+Title: Supplemental Data for Multilevel Regression and Poststratification
 Author: 
-  Andrew Gelman <gelman@stat.columbia.edu>,
   Michael Malecki <malecki@wustl.edu>,
-  Daniel Lee <bearlee@alum.mit.edu>,
-  Yu-Sung Su <ys463@columbia.edu>,
-  Jiqiang Guo <jg3263@columbia.edu> 
-Maintainer: Jiqiang Guo <jg3263@columbia.edu>, Michael Malecki
-        <malecki@gmail.com>, Daniel Lee <bearlee@alum.mit.edu>
-Depends: R (>= 2.14), sp
+  Jeffrey R. Lax <JRL2124@columbia.edu>,
+  Andrew Gelman <gelman@stat.columbia.edu>
+Maintainer: Michael Malecki <malecki@gmail.com>
+Depends: R (>= 2.15)
 Description: Data for package Multilevel Regressions and Poststratification (MRP) 
-             U.S. States and Territories map data (spmap.states) 
-             Combined 2004-2005 poll data: support for same-sex civil marriage (samesexmarriage) 
+             U.S. States and Territories map data (spmap.states)
              US Census Public Use Microdata Sample (PUMS) for Poststratification (mrp.census) 
-             States and Regions for MRP (mrp.region) 
-             CCES.complete 
+             States and Region: (NE, S, MW, W, DC) for MRP (mrp.region) 
+             Singly missing-imputed 2010 Cooperative Congressional Election Study Common Content
 License: GPL (>= 2)
 LazyLoad: yes
 LazyData: yes
-Packaged: 2012-02-10 01:27:48 UTC; jq
