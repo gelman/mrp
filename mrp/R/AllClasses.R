@@ -84,7 +84,8 @@ setClass(Class="mrp",
          poll = "NWayData",
          data = "data.frame",
          formula = "formula",
-         multilevelModel = "bmerMod",
+         ## TEMPORARY: because of naming between versions of lme/blme
+         multilevelModel = "ANY",
          population = "NWayData",
          outcome="character"),
 
