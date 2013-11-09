@@ -406,7 +406,7 @@ timPalette <-
 ##'          space="bottom",height=.5,width=.5)
 ##'        )
 ##' \dontrun{
-##' spplot(mrp.statelevel, state ~ age+edu, cuts=50,
+##' spplot(mrp.statelevel, state ~ age + education, cuts=50,
 ##'        subset=TRUE,
 ##'        spmap.states, "STATE", exclude=c("AK","DC","HI"),
 ##'        stroke=list(expression(hasmarriage2010==TRUE),
