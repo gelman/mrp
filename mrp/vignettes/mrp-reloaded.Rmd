@@ -2,20 +2,25 @@
 %\VignetteEngine{knitr::knitr}
 %\VignetteIndexEntry{MRP Primer Reloaded}
 -->
-
+<script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+<script type="text/x-mathjax-config"> MathJax.Hub.Config({ TeX: { equationNumbers: {autoNumber: "all"} } });       
+</script>
 # Package, Data, Examples, and this Vignette
 
 The running example uses open access data from the Comprehensive Congressional Election Study from 2008. You can run the 'simple' models just by doing `example(mrp)` or `example(plotmrp)`. The purpose of this document is to explain what things do in a somewhat more friendly way than the usual R function documentation. For the vignette, we also show the more complete, closer-to-real-life 'not run' models, but these are also present in the R-doc 'examples'.
 
 
-```{r loading-the-package}
+```{r loading-the-package, message=FALSE}
 library(mrp)
+```
+
+## Data
+
+```{r, load-the-data}
 data(CCES.complete)
 data(mrp.census)
 data(mrp.regions)
 ```
-
-## Data
 
 The survey included in the package as `CCES.complete` is the 2008 Common Content from the CCES, a large national sample of adults in the US. We also include some state-level data as `Statelevel`, attributed to Lax, Kastellec, and Phillips; and Lax's "Demographically Purged State Predictor (DPSP)" as `dpsp`, and aggregated US Census/ACS data as `mrp.census`. A convenience data frame of (factor) US state abbreviations and the "regions" that researchers often use is included as `mrp.regions`. 
 
@@ -40,7 +45,7 @@ A projected sp-package map object also containing a data frame with state names,
 Almost all data will involve recoding and carefully checking categorical variables. We rely heavily on R's "factor" data type. Factors have associated "levels" (names for categories) and may be ordered. For MRP, categorical variables need to be factors, and the survey data's levels need to be a subset of those in the population data. If survey data exist for all population cells, so much the better, but MRP can only make predictions for cells that exist in the population.
 
 To ensure matching of strata between poll and population, both should be factors with identical names and levels.
-```{r}
+```{r recode-cces}
 CCES.complete <- within (CCES.complete, {
   education <- factor(education,exclude=NA)
   female <- factor(sex=="Female", labels=c("Male","Female"), exclude=NA)
@@ -51,7 +56,7 @@ CCES.complete <- within (CCES.complete, {
 The survey has four levels of education, so we need to combine
 the top two levels in the census data. We'll also go ahead
 and trim it down to just the variables used here.
-```{r}
+```{r recode-census, f}
 
 mrp.census <- within(mrp.census,{
     age <- factor(age,exclude=NA,labels=c("18-29","30-44","45-64","65+"))
@@ -72,5 +77,37 @@ mrp.census <- na.omit(mrp.census)
 
 In the msot basic setup, MRP will fit an intercept to each of the groups provided in the `formula.cell`. It is called this because it defines the "cells" of the hypercube of geographic-demographic classifications that are partially pooled by the multilevel model. In the first example, these categories are **state, age,** and **education**; all of these exist in the census data as well. The outcome variable **ban.gaymarr** is the response to the following question in the CCES common content:
 
-> Congress considered many important bills over the past two years. For each of the following tell us whether you support or oppose the legislation in principle: Constitutional Amendment banning Gay Marriage ("Support" coded 1; "Oppose" coded as 0).
+> Congress considered many important bills over the past two years. For each of the following tell us whether you support or oppose the legislation in principle: Constitutional Amendment banning Gay Marriage ("Support" coded 1; "Oppose" 0).
 
+```{r mrp-simple, message=FALSE, results='hide'}
+mrp.simple <- mrp(ban.gaymarr ~ state+age+education, 
+                  data=CCES.complete,
+                  population=mrp.census,
+                  pop.weights="weighted2008")
+```
+### What's happening inside the `mrp()` black box? 
+
+1. Stratify the poll data according to the *formula.cell*. This creates an N-way array of data where the dimensions are given by the categories of the stratification variables. On this array, it computes the mean of the binary responses in each cell, and the effective N taking into account any survey weights provided, and the “design effect” in that cell of the array. 
+
+1. Stratify the census data according to the same formula. The dimensions are checked and if the census contains an extra level on any dimension (states with no survey respondents, for example), those cells are created in the survey N-way data as well, with $\bar{Y}=0.5$ and cell effective N of 0. 
+
+1. Collapse the aligned N-way structure back to a two-dimensional matrix with factors for array extent indexing. The model-fitting functions will turn these into indicator matrices transparently.
+
+1. With the model data, do any transformations specified in *grouplevel.expressions* and `join` the members of *grouplevel.data.frames*.
+
+1. Fit the multilevel model. By default *formula.model* just fits varying intercepts for the same terms as the *formula.cell*.
+
+Poststratification is straightforward: multiply the fitted values from the multilevel model by the population frequencies, and collapse across any remaining dimensions. Below, we collapse across states to show the poststratified estimates of support for same-sex marriage by education and age using the formula interface of the ‘poststratify’ method.
+
+```{r poststratify-simple,results='asis',message=FALSE}
+library(xtable)
+table <- poststratify(mrp.simple, ~ education + age)
+print(xtable(table,
+             caption="Support for same-sex marriage (in percent) by level of education and age cohort. Simple model poststratified results."
+             ), 
+      type="html")
+```
+
+```{r map-simple,dev='quartz_png', fig.height=7.5, fig.width=9}
+spplot(mrp.simple, state~age+education, exclude=c("AK","HI"))
+```
