@@ -215,7 +215,7 @@ mrp <- function(formula.cell,
     if(is.data.frame(pop)) {
         cat("\nMatching poll data to population cells.\n")
         checkPopulationData(pop, population.varnames)
-        pop.array <- makePopulationArray(pop, pop.weights, population.varnames,
+        pop.array <- .makePopulationArray(pop, pop.weights, population.varnames,
                                          pop.margin=pop.margin)
 
 
@@ -315,7 +315,7 @@ checkResponse <- function(response, varname) {
 checkPoll <- function(poll){
     return(poll)
 }
-makePopulationArray <- function(pop, pop.weights, population.varnames,
+.makePopulationArray <- function(pop, pop.weights, population.varnames,
                                 pop.margin=pop.margin) {
 
     if (is.null(pop.weights)) {
@@ -329,7 +329,24 @@ makePopulationArray <- function(pop, pop.weights, population.varnames,
                             margin=pop.margin)
     pop.array
 }
-
+##' Make an array suitable for poststratification
+##'
+##'
+##' @param population A \code{data.frame} containing population (e.g. census)
+##' containing numeric weight and some factor variables for cross-classification
+##' @param pop.weights character. The column of the \code{population} data that
+##' contains frequencies or proportions (of the entire population) for the
+##' cells defined by population.varnames
+##' @param population.varnames character vector of names of columns describing
+##' the cells wanted in the array
+##' @return NWayData (array with some extra stuff)
+##' @export
+makePopulationArray <- function(population, pop.weights, population.varnames){
+    pop.array <- .makePopulationArray(population, pop.weights, list(inpop=population.varnames), pop.margin=NULL)
+    pop.array <- new("NWayData", pop.array, type="population",
+                     levels=dimnames(pop.array))
+    pop.array
+}
   ## For population array, if there are "ways" present in poll but constant
 ## in population, move those terms to the end. Will become constant (1s).
 reorder.popterms <- function(poll, pop){

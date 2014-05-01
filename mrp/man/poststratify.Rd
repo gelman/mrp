@@ -16,7 +16,10 @@
   corresponding to the \dQuote{ways} in the population data
   by which to poststratify.  The right-hand side can also
   be a character vector of such names or a logical vector
-  of length \dQuote{ways}.
+  of length \dQuote{ways}.}
+
+  \item{population}{An optional replacement population
+  array
 
   See example in \code{\link{mrp}}.}
 

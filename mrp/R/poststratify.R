@@ -1,5 +1,5 @@
 
-.poststratify <- function (object, formula=NULL) {
+.poststratify <- function (object, formula=NULL, population=NULL) {
     spec <- formula
     if(is.null(object@population)) {
         warning("Object does not contain population data;\nestimates returned instead.")
@@ -11,9 +11,12 @@
     if(is.formula(spec)){
         spec <- attr(terms(spec),"term.labels")
     }
-    stopifnot (object@population != numeric(0))
+    if (is.null(population)) {
+      population <- object@population
+    }
+    stopifnot (population != numeric(0))
 
-    poststratified <- getThetaHat(object) * object@population
+    poststratified <- getThetaHat(object) * population
 
     if(!is.logical(spec)){
         groups <- match(spec,
@@ -22,10 +25,10 @@
         groups <- which (spec == TRUE)
     }
     if (length(groups) == 0) {
-        return (sum (poststratified, na.rm=TRUE) / sum (object@population))
+        return (sum (poststratified, na.rm=TRUE) / sum (population))
     } else {
         ans <- (apply (poststratified, groups, sum, na.rm=TRUE) /
-                apply(object@population, groups, sum))
+                apply(population, groups, sum))
         ans[is.nan(ans)] <- NA
         return(ans)
     }
@@ -49,6 +52,7 @@
 ##' variable names corresponding to the \dQuote{ways} in the population data by
 ##' which to poststratify.  The right-hand side can also be a character vector
 ##' of such names or a logical vector of length \dQuote{ways}.
+##' @param population An optional replacement population array
 ##'
 ##' See example in \code{\link{mrp}}.
 ##' @param fun The function (default=\emph{mean}) to summarize the collapsed
@@ -60,7 +64,7 @@
 ##' for other methods on the objects produced by \code{mrp()};
 ##' \code{\link{plotmrp}} for how to plot poststratified results onto maps.
 ##' @export
-setGeneric ("poststratify", function (object, formula=NULL, ...) { standardGeneric ("poststratify")})
+setGeneric ("poststratify", function (object, formula=NULL, population=NULL, ...) { standardGeneric ("poststratify")})
 setMethod (f="poststratify",
            signature=signature(object="mrp"),
            definition=.poststratify)
